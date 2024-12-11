@@ -1,0 +1,1 @@
+Change your nickname to "pwn" and receive the flag but this time another user holds the nickname (Hint: This user will disconnect if they receive a message saying "Press alt+f4 to join my channel").

@@ -3,3 +3,5 @@ name: Honors Dojo
 type: public
 award:
   emoji: ⌨
+modules:
+ - id: irc

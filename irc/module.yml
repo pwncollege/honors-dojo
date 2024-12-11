@@ -1,0 +1,39 @@
+name: Introduction to IRC Servers
+challenges:
+  - id: join
+    name: Join an IRC Server
+  - id: join2
+    name: Join an IRC Server (with an IRC Client)
+  - id: nick
+    name: Change your nickname
+  - id: channel
+    name: Join a channel
+  - id: msg
+    name: Message a channel
+  - id: attack
+    name: Remove another user
+resources:
+  - name: "IRC Servers"
+    type: lecture
+    video: ppp73znsldE
+    playlist: PLisuK3zAF889i36aqRR1O-n8o9BNnpppa
+  - name: "IRC Clients"
+    type: lecture
+    video: bYJiOUYYcTc
+    playlist: PLisuK3zAF889i36aqRR1O-n8o9BNnpppa
+  - name: "Nicknames"
+    type: lecture
+    video: FimdFWeKYyM
+    playlist: PLisuK3zAF889i36aqRR1O-n8o9BNnpppa
+  - name: "Channels"
+    type: lecture
+    video: IsmbAklCiI4
+    playlist: PLisuK3zAF889i36aqRR1O-n8o9BNnpppa
+  - name: "Private Messages"
+    type: lecture
+    video: vPyeCbrNuBM
+    playlist: PLisuK3zAF889i36aqRR1O-n8o9BNnpppa
+  - name: "Vulnerabilities"
+    type: lecture
+    video: dhBF26XCn3c
+    playlist: PLisuK3zAF889i36aqRR1O-n8o9BNnpppa

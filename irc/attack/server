@@ -1,0 +1,27 @@
+#!/opt/pwn.college/python
+
+import subprocess
+import multiprocessing
+import time
+
+def server():
+    command = ["/challenge/ircserver/miniircd", "--listen", "127.0.0.1", "--ports", "667"]
+    subprocess.run(command, text=True)
+
+def client():
+    # pwn user
+    time.sleep(1)
+    command = ["nc", "127.0.0.1", "667"]
+    commands = "USER Hacker * *: Hacker P College\nNICK pwn\n"
+    process = subprocess.Popen(command, stdin=subprocess.PIPE, text=True)
+    process.communicate(commands)
+
+if __name__ == "__main__":
+    serverProcess = multiprocessing.Process(target=server)
+    clientProcess = multiprocessing.Process(target=client)
+
+    serverProcess.start()
+    clientProcess.start()
+
+    serverProcess.join()
+    clientProcess.join()
