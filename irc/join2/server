@@ -1,0 +1,7 @@
+#!/opt/pwn.college/python
+
+import subprocess
+
+command = ["/challenge/ircserver/miniircd", "--listen", "127.0.0.1", "--ports", "667", "--motd", "/flag"]
+
+subprocess.run(command, text=True)

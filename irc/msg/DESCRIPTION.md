@@ -1,0 +1,1 @@
+Send a message to the #flag channel to receive the flag (use what you learned in the last level to create the channel).

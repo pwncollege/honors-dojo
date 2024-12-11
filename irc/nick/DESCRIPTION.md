@@ -1,0 +1,1 @@
+Change your nickname to "pwn" and receive the flag.
