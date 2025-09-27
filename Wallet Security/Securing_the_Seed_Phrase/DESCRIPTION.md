@@ -1,0 +1,1 @@
+Secure a dummy seed phrase by using `tr` for obfuscation and `chmod` to set file permissions to owner-only access.
