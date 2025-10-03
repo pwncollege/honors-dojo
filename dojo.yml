@@ -5,4 +5,4 @@ award:
   emoji: ⌨
 modules:
  - id: irc
- - id: wallet-security
+ - id: walletSecurity
