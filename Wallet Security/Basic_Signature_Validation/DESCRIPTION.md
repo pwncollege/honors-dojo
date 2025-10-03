@@ -1,0 +1,1 @@
+Write a shell script using `if/then/else` conditionals to determine which signature file will cause a cryptographic verification failure based on a simple file property (character count).

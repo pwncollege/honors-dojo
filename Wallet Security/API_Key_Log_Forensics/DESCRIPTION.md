@@ -1,0 +1,1 @@
+Use a multi-stage `grep` pipeline to filter a large server log and extract only the unauthorized API key responsible for a simulated breach.
