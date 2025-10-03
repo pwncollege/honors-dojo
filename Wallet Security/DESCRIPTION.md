@@ -1,6 +1,6 @@
 # Web3 Wallet Security Fundamentals: A Linux Command Line Approach
 
-A practical, hands-on module focused on Web3/Crypto wallet security, using only the Linux command-line utilities you have learned in class.
+A practical, hands-on module focused on Web3/Crypto wallet security, using only the Linux command-line utilities you have learned in class(CSE365).
 
 - **Objective:** Learn fundamental and advanced wallet security concepts by using core Linux commands to simulate real-world security failures and forensic analysis.
 - **Commands Used:** `cat`, `grep`, `diff`, `touch`, `tr`, `chmod`, Pipelining, Shell Scripting with Conditionals (`if/then/else`), and Environment Variable usage.
