@@ -1,0 +1,1 @@
+Basic challenge to determine if the infrastructure was properly set up.
