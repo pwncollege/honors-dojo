@@ -1,4 +1,4 @@
-name: Introduction to IRC Servers
+name: Continuous Integration
 challenges:
    - id: infra-check
      name: Example
