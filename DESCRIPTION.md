@@ -1,4 +1,4 @@
-**NOTE: This is a fork. The true honors dojo can be found at [https://pwn.college/honors-dojo~ef9ed69f/](this link).**
+**NOTE: This is a fork. The true honors dojo can be found at** [https://pwn.college/honors-dojo~ef9ed69f](this link).
 
 You are currently viewing Eli Sells's test & development environment for the CI module.
 
