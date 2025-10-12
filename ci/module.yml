@@ -18,8 +18,6 @@ resources:
   - name: "Example (lecture)."
     type: lecture
     video: dQw4w9WgXcQ
-    description: |
-      I apologize in advance for my choice of test video.
 #    playlist: PLisuK3zAF889i36aqRR1O-n8o9BNnpppa
 #  - name: "IRC Clients"
 #    type: lecture
