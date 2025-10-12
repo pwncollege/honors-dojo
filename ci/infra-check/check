@@ -1,0 +1,53 @@
+#!/usr/bin/exec-suid -- /usr/local/bin/python -I
+
+import time
+import subprocess
+import os
+
+# Standard ANSI escape codes for colored text.
+# Example: text_colors[green]
+text_colors = {
+    'green':    '\033[92m',
+    'cyan':     '\033[96m',
+    'yellow':   '\033[93m', # could show up as orange
+    'red':      '\033[91m',
+}
+
+# Run the subprocess as a second user (running as root could allow catting the flag, and running as the
+# user prevents us from doing any necessary permissions shenanigans for challenges)
+def run_workflow() -> bool:
+    os.chdir("/challenge/repository")
+    command = ["sudo", "-u", "devops_runner", "act", "push", "--container-architecture", "host"]
+    try:
+        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        return True
+    except subprocess.CalledProcessError as e:
+        chal_fail(e)
+        return False
+
+def chal_pass():
+    print(text_colors['green'] + "The workflow has completed as expected. Great job! Here's your flag:")
+    with open("/flag") as f:
+        print(f.read())
+
+def chal_fail(e: subprocess.CalledProcessError):
+    print(text_colors['red'] + "The workflow has failed.")
+    print(e.stderr)
+
+# Print character-by-character to console (simulates typing).
+def slow_print(text: str, delay: float):
+    for c in text:
+        print(c, end="", flush=True)
+        time.sleep(delay)
+        
+
+# Entry Point
+
+slow_print("git commit -m \"ops: Updated CI\"\n", 0.05)
+print("[main a20d5d7] ops: Updated CI")
+print("1 file changed, a couple of lines changed idk i'm not gonna spawn a subprocess to check this\n")
+slow_print("git push\n", 0.05)
+print("Simulating CI run...")
+
+if( run_workflow() ):
+    chal_pass()
