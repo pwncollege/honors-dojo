@@ -17,3 +17,7 @@ chown -R devops_runner "/challenge/repository"
 # Allow the user to modify just the workflows folder
 chmod -R 777 "/challenge/repository/.github/workflows" # RWX-RWX-RWX
 chown -R hacker "/challenge/repository/.github/workflows"
+
+# Set up the repo
+cd /challenge/repository
+git init
