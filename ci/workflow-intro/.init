@@ -6,6 +6,9 @@ mv "/challenge/act" "/usr/local/bin/act"
 # Create new user
 useradd -m -s /bin/bash -p '' devops_runner
 
+# Give devops_runner access to the flag
+chown -R devops_runner "/flag"
+
 # Change act owner to devops_runner
 chmod -R 500 "/usr/local/bin/act" # R-X--------
 chown -R devops_runner "/usr/local/bin/act"

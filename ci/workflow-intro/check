@@ -35,16 +35,15 @@ def run_workflow() -> int:
     user_gid       = pw_record.pw_gid
     os.initgroups(user_name, user_gid)
 
-    os.environ["PATH"] = os.environ.get("PATH", "") + os.pathsep + "/usr/local/bin/act"
-    os.environ["ACT_HOME"] = "/tmp/act-cache"
-    os.makedirs("/tmp/act-cache/act/workflow", exist_ok=True)
-    for script in glob.glob("/tmp/act-cache/act/workflow/*.sh"):
-        st = os.stat(script)
-        os.chmod(script, st.st_mode | stat.S_IEXEC)
+    env = {
+    "PATH": "/usr/local/bin/act:/run/challenge/bin:/run/dojo/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "HOME": "/home/devops_runner",
+    "USER": "devops_runner",
+    }
 
     command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
     try:
-        subpro = subprocess.Popen(command, cwd='/challenge/repository')
+        subpro = subprocess.Popen(command, cwd='/challenge/repository', env=env)
         result = subpro.wait()
         return result
     except Exception as e:

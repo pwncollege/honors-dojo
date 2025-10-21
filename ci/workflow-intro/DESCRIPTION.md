@@ -1,6 +1,6 @@
 Let's try something really simple to start.
 
-As you'll recall from the videos, the .yml functions almost like a bash script. For this challenge (and only this challenge), the workflow will run as root. The output of the runner will be displayed in stdout. Can you get the flag?
+As you'll recall from the videos, the .yml functions almost like a bash script. For this challenge (and only this challenge), `/flag` will be owned by the runner. The output of the runner will be displayed in stdout. Can you get the flag?
 
 --
 

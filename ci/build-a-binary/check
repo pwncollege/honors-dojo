@@ -39,14 +39,13 @@ def run_workflow() -> int:
     "USER": "devops_runner",
     }
 
-    os.environ["ACT_HOME"] = "/tmp/act-cache"
-
     command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
     try:
         subpro = subprocess.Popen(command, preexec_fn=demote_workflow(user_uid, user_gid), cwd='/challenge/repository', env=env)
         result = subpro.wait()
         return result
     except Exception as e:
+        print("Exception during subprocess spawning: " + e)
         return -1
 
 # This one runs as root
