@@ -1,7 +1,9 @@
 name: Continuous Integration
 challenges:
-   - id: infra-check
-     name: Example
+#   - id: infra-check
+#     name: Example
+   - id: build-a-binary
+     name: Build a Binary
 #  - id: join
 #    name: Join an IRC Server
 #  - id: join2
