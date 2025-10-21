@@ -5,6 +5,8 @@ import subprocess
 import os
 import pwd
 import sys
+import glob
+import stat
 
 # Standard ANSI escape codes for colored text.
 # Example: text_colors[green]
@@ -35,6 +37,10 @@ def run_workflow() -> int:
 
     os.environ["PATH"] = os.environ.get("PATH", "") + os.pathsep + "/usr/local/bin/act"
     os.environ["ACT_HOME"] = "/tmp/act-cache"
+    os.makedirs("/tmp/act-cache/act/workflow", exist_ok=True)
+    for script in glob.glob("/tmp/act-cache/act/workflow/*.sh"):
+        st = os.stat(script)
+        os.chmod(script, st.st_mode | stat.S_IEXEC)
 
     command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
     try:
