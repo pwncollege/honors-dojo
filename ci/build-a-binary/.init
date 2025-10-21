@@ -11,6 +11,7 @@ chmod -R 500 "/usr/local/bin/act" # R-X--------
 chown -R devops_runner "/usr/local/bin/act"
 
 # Change repo ownership to allow read-only outside of the workflows folder
+mkdir /challenge/repository/build
 chmod -R 755 "/challenge/repository" # RWX-R-X-R-X
 chown -R devops_runner "/challenge/repository"
 
