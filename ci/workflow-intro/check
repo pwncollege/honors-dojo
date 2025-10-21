@@ -33,18 +33,15 @@ def run_workflow() -> int:
     user_gid       = pw_record.pw_gid
     os.initgroups(user_name, user_gid)
 
-    env = {
-    "PATH": "/usr/local/bin/act:/run/challenge/bin:/run/dojo/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-    "HOME": "/home/devops_runner",
-    "USER": "devops_runner",
-    }
+    os.environ["PATH"] = os.environ.get("PATH", "") + os.pathsep + "/usr/local/bin/act"
 
     command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
     try:
-        subpro = subprocess.Popen(command, '''preexec_fn=demote_workflow(user_uid, user_gid)''', cwd='/challenge/repository', env=env)
+        subpro = subprocess.Popen(command, cwd='/challenge/repository')
         result = subpro.wait()
         return result
     except Exception as e:
+        print("Exception during subprocess spawning: " + e)
         return -1
 
 def chal_pass() -> None:
