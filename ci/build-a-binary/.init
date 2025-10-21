@@ -21,3 +21,10 @@ chown -R hacker "/challenge/repository/.github/workflows"
 # Set up the repo
 cd /challenge/repository
 git init
+# git config --global --add safe.directory /challenge/repository
+git config --global user.email "not@realemail.com"
+git config --global user.name "Test User"
+
+# Commit the source files
+git add src/*
+git commit -m "Initial Commit"
