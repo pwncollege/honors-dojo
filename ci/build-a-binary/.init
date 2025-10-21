@@ -27,4 +27,5 @@ git config --global user.name "Test User"
 
 # Commit the source files
 git add src/*
+git add Makefile
 git commit -m "Initial Commit"
