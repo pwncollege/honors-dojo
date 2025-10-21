@@ -34,6 +34,7 @@ def run_workflow() -> int:
     os.initgroups(user_name, user_gid)
 
     os.environ["PATH"] = os.environ.get("PATH", "") + os.pathsep + "/usr/local/bin/act"
+    os.environ["ACT_HOME"] = "/tmp/act-cache"
 
     command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
     try:
