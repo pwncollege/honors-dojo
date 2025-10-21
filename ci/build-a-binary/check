@@ -51,8 +51,9 @@ def run_workflow() -> int:
 def run_binary() -> int:
     command = ["/challenge/repository/build/program"]
     try:
-        subprocess.Popen(command)
-        return 0
+        subpro = subprocess.Popen(command)
+        result = subpro.wait()
+        return result
     except Exception as e:
         return 1
 
