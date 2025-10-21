@@ -38,7 +38,7 @@ def run_workflow() -> int:
     "USER": "devops_runner",
     }
 
-    command = ["act", "push", "--container-architecture", "host"]
+    command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
     try:
         subpro = subprocess.Popen(command, preexec_fn=demote_workflow(user_uid, user_gid), cwd='/challenge/repository', env=env)
         result = subpro.wait()
