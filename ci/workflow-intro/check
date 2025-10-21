@@ -76,6 +76,6 @@ print("Simulating CI run...")
 
 result = run_workflow()
 if( result==0 ):
-    chal_pass()
+    print("Great job! Your workflow has exited successfully. You should see the flag above.")
 else:
     chal_fail(str(result))
