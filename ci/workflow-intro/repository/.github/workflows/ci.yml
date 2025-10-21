@@ -6,4 +6,4 @@ jobs:
   build-binary:
     runs-on: ubuntu-latest
     steps:
-      - run: exit 1 # causes auto-fail
+      - run: exit 1 # hint: This can be done in one line

@@ -1,7 +1,7 @@
 name: Continuous Integration
 challenges:
-#   - id: infra-check
-#     name: Example
+   - id: workflow-intro
+     name: The Workflow .yml
    - id: build-a-binary
      name: Build a Binary
 #  - id: join

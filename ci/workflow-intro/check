@@ -41,7 +41,7 @@ def run_workflow() -> int:
 
     command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
     try:
-        subpro = subprocess.Popen(command, preexec_fn=demote_workflow(user_uid, user_gid), cwd='/challenge/repository', env=env)
+        subpro = subprocess.Popen(command, '''preexec_fn=demote_workflow(user_uid, user_gid)''', cwd='/challenge/repository', env=env)
         result = subpro.wait()
         return result
     except Exception as e:
