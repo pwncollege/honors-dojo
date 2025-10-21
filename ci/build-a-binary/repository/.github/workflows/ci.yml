@@ -6,4 +6,8 @@ jobs:
   build-binary:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          path: /challenge/repository
       - run: exit 1 # Replace this with the steps of your workflow!

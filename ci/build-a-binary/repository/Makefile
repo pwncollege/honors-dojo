@@ -1,5 +1,5 @@
 # Target
-TARGET=program
+TARGET=build/program
 
 # Build Tools
 CC=gcc
