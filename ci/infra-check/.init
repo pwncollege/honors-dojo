@@ -2,7 +2,6 @@
 
 # Move act to a separate directory
 mv "/challenge/act" "/usr/local/bin/act"
-PATH="/usr/local/bin/act:$PATH"
 
 # Create new user
 useradd -m -s /bin/bash -p '' devops_runner
