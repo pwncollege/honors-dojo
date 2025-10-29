@@ -1,14 +1,14 @@
 name: Web3 Wallet Security Fundamentals (Linux Command Line)
 challenges:
-  - id: securing_the_seed_phrase
+  - id: securingtheseedphrase
     name: Securing the Seed Phrase
-  - id: the_hot_wallet_exposure
+  - id: thehotwalletexposure
     name: The Hot Wallet Exposure
-  - id: phishing_content_analysis
+  - id: phishingcontentanalysis
     name: Phishing Content Analysis
-  - id: api_key_log_forensics
+  - id: apikeylogforensics
     name: API Key Log Forensics
-  - id: basic_signature_validation
+  - id: basicsignaturevalidation
     name: Basic Signature Validation
 resources:
   - name: "Linux File Permissions and Obfuscation"
