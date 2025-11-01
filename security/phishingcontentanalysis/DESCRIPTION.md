@@ -1,0 +1,1 @@
+Use the `diff` and `grep` commands to compare two files and isolate the single line of code that contains the malicious phishing destination.
