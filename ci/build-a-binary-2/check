@@ -6,6 +6,7 @@ import os
 import pwd
 import sys
 import re
+from typing import Tuple
 
 # Standard ANSI escape codes for colored text.
 # Example: text_colors[green]
@@ -54,7 +55,7 @@ def demote_workflow(user_uid, user_gid):
 
 # Run the subprocess as a second user (running as root could allow catting the flag, and running as the
 # user prevents us from doing any necessary permissions shenanigans for challenges)
-def run_workflow() -> tuple[int, str]:
+def run_workflow():
     os.chdir("/challenge/repository")
     pw_record = pwd.getpwnam("devops_runner")
     user_uid = pw_record.pw_uid
