@@ -3,7 +3,7 @@ TARGET=build/program
 
 # Build Tools
 CC=gcc
-CFLAGS=-Og -g -fdebug-prefix-map=$PWD=. -frandom-seed=42 -Wl,--build-id=none
+CFLAGS=-O2 -fdebug-prefix-map=$PWD=. -frandom-seed=42 -Wl,--build-id=none
 # ^ Making compilation deterministic so we can hash it
 
 # Sources
