@@ -3,9 +3,8 @@ TARGET=build/program
 
 # Build Tools
 CC=gcc
-CFLAGS=-Og -g
-
-# Leaving debug information in to be nice :)
+CFLAGS=-Og -g -fdebug-prefix-map=$PWD=. -frandom-seed=42 -Wl,--build-id=none
+# ^ Making compilation deterministic so we can hash it
 
 # Sources
 SOURCES=src/program.c
@@ -16,6 +15,8 @@ all: $(TARGET)
 $(TARGET): $(SOURCES)
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ $<
+	strip $@
+	sha256sum $@
 
 # Clean build
 clean:
