@@ -1,11 +1,18 @@
 name: Continuous Integration
 challenges:
+   - content: Getting Started
+     type: header
+   - name: "Example (lecture)."
+     type: lecture
+     video: dQw4w9WgXcQ
    - id: workflow-intro
      name: The Workflow .yml
    - id: build-a-binary
      name: Build a Binary
    - id: build-a-binary-2
      name: Build a Binary 2
+   - content: Automated Testing
+     type: header
 #  - id: join
 #    name: Join an IRC Server
 #  - id: join2
@@ -18,10 +25,6 @@ challenges:
 #    name: Message a channel
 #  - id: attack
 #    name: Remove another user
-resources:
-  - name: "Example (lecture)."
-    type: lecture
-    video: dQw4w9WgXcQ
 #    playlist: PLisuK3zAF889i36aqRR1O-n8o9BNnpppa
 #  - name: "IRC Clients"
 #    type: lecture
