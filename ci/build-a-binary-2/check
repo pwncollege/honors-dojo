@@ -34,6 +34,7 @@ def precheck_script() -> bool:
         result = subprocess.run(["make"], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception as e:
         chal_fail(f"Error with challenge setup (REPORT THIS!): {e}")
+        print(result)
         return False
 
     # Parse the file for the SHA256 hash (assuming it prints like 'HASH  build/program')
