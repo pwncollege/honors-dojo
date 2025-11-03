@@ -34,7 +34,6 @@ git commit -m "Initial Commit"
 # Build the binary and save the hash
 make
 sha256sum build/program > /.secret
-objdump build/program >> /.secret
 rm -rf build/*
 chown root "/.secret"
 chmod 600 /.secret

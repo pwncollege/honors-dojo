@@ -15,7 +15,10 @@ all: $(TARGET)
 $(TARGET): $(SOURCES)
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -o $@ $<
-	strip $@
+	strip --strip-all $@
+	objcopy --adjust-section-vma .text=0 --adjust-section-vma .data=0 $@ $@.normalized
+	mv $@.normalized $@
+	rm $@.normalized
 	sha256sum $@
 
 # Clean build
