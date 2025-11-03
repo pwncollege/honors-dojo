@@ -1,5 +1,5 @@
 name: Continuous Integration
-challenges:
+resources:
    - content: Getting Started
      type: header
    - name: "Example (lecture)."
@@ -7,10 +7,14 @@ challenges:
      video: dQw4w9WgXcQ
    - id: workflow-intro
      name: The Workflow .yml
+     type: challenge
    - id: build-a-binary
      name: Build a Binary
+     type: challenge
    - id: build-a-binary-2
      name: Build a Binary 2
+     type: challenge
+     
    - content: Automated Testing
      type: header
 #  - id: join
