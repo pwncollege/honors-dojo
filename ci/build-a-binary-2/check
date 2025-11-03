@@ -24,32 +24,51 @@ def precheck_script() -> bool:
     global sha256_hash
     with open('/challenge/repository/.github/workflows/ci.yml') as f:
         file = f.read()
-        absolute = re.search('^\s*(cd|mv|cp|ln)\s+/\S+', file)
-        if absolute != None:
+        absolute = re.search(r'^\s*(cd|mv|cp|ln)\s+/\S+', file, re.MULTILINE)
+        if absolute:
             chal_fail("Absolute path moves were found. These are not allowed in this challenge!")
             return False
 
     try:
         # Run make and capture stdout/stderr
-        result = subprocess.run(["make"], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        proc = subprocess.Popen(
+            ["make"],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd="/challenge/repository"
+        )
+
+        # Read all output line by line
+        output_lines = []
+        for line in proc.stdout:
+            print(line, end="")   # live print
+            output_lines.append(line)
+        proc.wait()
     except Exception as e:
         chal_fail(f"Error with challenge setup (REPORT THIS!): {e}")
         return False
-    
-    print(result)
 
-    # Parse the file for the SHA256 hash (assuming it prints like 'HASH  build/program')
+    # Join lines into a single string for regex matching
+    full_output = "".join(output_lines)
+
+    # Parse the SHA256 hash
     sha256_pattern = re.compile(r'\b([0-9a-f]{64})\b\s+build/program')
-
-    for line in result.stdout.splitlines():
-        match = sha256_pattern.search(line)
-        if match:
-            sha256_hash = match.group(1)
-            break
+    match = sha256_pattern.search(full_output)
+    if match:
+        sha256_hash = match.group(1)
 
     if not sha256_hash:
         chal_fail("The hash could not be found in the build! Restart the challenge, and if it fails again, report this error.")
-    
+
+    # Remove build dir contents
+    build_file = "/challenge/repository/build/program"
+    if os.path.exists(build_file):
+        try:
+            os.unlink(build_file)
+        except Exception as e:
+            chal_fail(f"Failed to remove build file: {e}")
+
     return True
 
 def postcheck_script(workflow_output: str) -> bool:
