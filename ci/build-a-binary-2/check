@@ -31,7 +31,7 @@ def precheck_script() -> bool:
 
     try:
         # Run make and capture stdout/stderr
-        result = subprocess.run(["make"], check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = subprocess.run(["make"], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception as e:
         chal_fail(f"Error with challenge setup (REPORT THIS!): {e}")
         return False
