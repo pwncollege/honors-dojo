@@ -17,12 +17,33 @@ text_colors = {
     'dflt':     '\033[0m'
 }
 
-def check_script():
+def precheck_script() -> bool:
     with open('/challenge/repository/.github/workflows/ci.yml') as f:
         file = f.read()
         absolute = re.search('^\s*(cd|mv|cp|ln)\s+/\S+', file)
         if absolute != None:
             chal_fail("Absolute path moves were found. These are not allowed in this challenge!")
+            return False
+        return True
+
+def postcheck_script(workflow_output: str) -> bool:
+    # Read the expected hash
+    with open("/.secret") as f:
+        expected_hash = f.read().strip().split()[0]
+
+    # Try to find a hash in the output
+    matches = re.findall(r"\b[0-9a-f]{64}\b", workflow_output)
+    if not matches:
+        chal_fail("The workflow did not build the binary correctly (makefile did not finish).")
+        return False
+
+    # If a hash matches, return true
+    for m in matches:
+        if m == expected_hash:
+            return True
+
+    chal_fail("The workflow did not build the binary correctly (hash does not match).")
+    return False # won't be reached
 
 # https://stackoverflow.com/questions/1770209/run-child-processes-as-different-user-from-a-long-running-python-process/6037494#6037494
 def demote_workflow(user_uid, user_gid):
@@ -33,28 +54,40 @@ def demote_workflow(user_uid, user_gid):
 
 # Run the subprocess as a second user (running as root could allow catting the flag, and running as the
 # user prevents us from doing any necessary permissions shenanigans for challenges)
-def run_workflow() -> int:
+def run_workflow() -> tuple[int, str]:
     os.chdir("/challenge/repository")
     pw_record = pwd.getpwnam("devops_runner")
-    user_name      = pw_record.pw_name
-    user_uid       = pw_record.pw_uid
-    user_gid       = pw_record.pw_gid
-    os.initgroups(user_name, user_gid)
+    user_uid = pw_record.pw_uid
+    user_gid = pw_record.pw_gid
+    os.initgroups(pw_record.pw_name, user_gid)
 
     env = {
-    "PATH": "/usr/local/bin/act:/run/challenge/bin:/run/dojo/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-    "HOME": "/home/devops_runner",
-    "USER": "devops_runner",
+        "PATH": "/usr/local/bin/act:/run/challenge/bin:/run/dojo/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "HOME": "/home/devops_runner",
+        "USER": "devops_runner",
     }
 
     command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
+
+    output_lines = []
     try:
-        subpro = subprocess.Popen(command, preexec_fn=demote_workflow(user_uid, user_gid), cwd='/challenge/repository', env=env)
-        result = subpro.wait()
-        return result
+        with subprocess.Popen(
+            command,
+            preexec_fn=demote_workflow(user_uid, user_gid),
+            cwd='/challenge/repository',
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        ) as proc:
+            for line in proc.stdout:
+                print(line, end="")         # live print
+                output_lines.append(line)    # capture for parsing
+            proc.wait()
+            return proc.returncode, "".join(output_lines)
     except Exception as e:
-        print("Exception during subprocess spawning: " + e)
-        return -1
+        print("Exception during subprocess spawning: " + str(e))
+        return -1, ""
 
 def chal_pass() -> None:
     print(text_colors['green'] + "The workflow has completed as expected. Great job! Here's your flag:")
@@ -81,9 +114,12 @@ print("1 file changed, a couple of lines changed idk i'm not gonna spawn a subpr
 slow_print("git push\n", 0.05)
 print("Simulating CI run...")
 
-check_script()
-result = run_workflow()
+precheck_script()
+result, workflow_output = run_workflow()
 if( result == 0 ):
-    print("\n" + text_colors['green'] + "Great job! If you succeeded, you should see the result above.")
+    if postcheck_script(workflow_output):  # verify hash
+        chal_pass()
+    else:
+        chal_fail("The challenge has failed.")
 else:
     chal_fail(str(result))

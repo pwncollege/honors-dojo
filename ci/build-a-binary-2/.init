@@ -30,3 +30,10 @@ git config --global user.name "Test User"
 git add src/*
 git add Makefile
 git commit -m "Initial Commit"
+
+# Build the binary and save the hash
+make
+sha256sum build/program > /.secret
+rm -rf build/*
+chown root "/.secret"
+chmod 600 /.secret
