@@ -18,19 +18,36 @@ text_colors = {
     'dflt':     '\033[0m'
 }
 
+sha256_hash = None
+
 def precheck_script() -> bool:
+    global sha256_hash
     with open('/challenge/repository/.github/workflows/ci.yml') as f:
         file = f.read()
         absolute = re.search('^\s*(cd|mv|cp|ln)\s+/\S+', file)
         if absolute != None:
             chal_fail("Absolute path moves were found. These are not allowed in this challenge!")
             return False
-        return True
+
+    # Run make and capture stdout/stderr
+    result = subprocess.run(["make"], check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    # Parse the file for the SHA256 hash (assuming it prints like 'HASH  build/program')
+    sha256_pattern = re.compile(r'\b([0-9a-f]{64})\b\s+build/program')
+
+    for line in result.stdout.splitlines():
+        match = sha256_pattern.search(line)
+        if match:
+            sha256_hash = match.group(1)
+            break
+
+    if not sha256_hash:
+        chal_fail("The hash could not be found in the build! Restart the challenge, and if it fails again, report this error.")
+    
+    return True
 
 def postcheck_script(workflow_output: str) -> bool:
-    # Read the expected hash
-    with open("/.secret") as f:
-        expected_hash = f.read().strip().split()[0]
+    global sha256_hash
 
     # Try to find a hash in the output
     matches = re.findall(r"\b[0-9a-f]{64}\b", workflow_output)
@@ -40,7 +57,7 @@ def postcheck_script(workflow_output: str) -> bool:
 
     # If a hash matches, return true
     for m in matches:
-        if m == expected_hash:
+        if m == sha256_hash:
             return True
 
     chal_fail("The workflow did not build the binary correctly (hash does not match).")
@@ -56,7 +73,6 @@ def demote_workflow(user_uid, user_gid):
 # Run the subprocess as a second user (running as root could allow catting the flag, and running as the
 # user prevents us from doing any necessary permissions shenanigans for challenges)
 def run_workflow():
-    os.chdir("/challenge/repository")
     pw_record = pwd.getpwnam("devops_runner")
     user_uid = pw_record.pw_uid
     user_gid = pw_record.pw_gid
@@ -109,15 +125,20 @@ def slow_print(text: str, delay: float) -> None:
 
 # Entry Point
 
+os.chdir("/challenge/repository")
 slow_print("git commit -m \"ops: Updated CI\"\n", 0.05)
 print("[main a20d5d7] ops: Updated CI")
 print("1 file changed, a couple of lines changed idk i'm not gonna spawn a subprocess to check this\n")
 slow_print("git push\n", 0.05)
 print("Simulating CI run...")
 
+print(text_colors['green'] + "Checking some preconditions..." + text_colors['dflt'])
 precheck_script()
+
+print(text_colors['green'] + "Starting the run..." + text_colors['dflt'])
 result, workflow_output = run_workflow()
 if( result == 0 ):
+    print(text_colors['green'] + "Checking some postconditions..." + text_colors['dflt'])
     if postcheck_script(workflow_output):  # verify hash
         chal_pass()
     else:
