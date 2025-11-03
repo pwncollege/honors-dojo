@@ -29,8 +29,12 @@ def precheck_script() -> bool:
             chal_fail("Absolute path moves were found. These are not allowed in this challenge!")
             return False
 
-    # Run make and capture stdout/stderr
-    result = subprocess.run(["make"], check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    try:
+        # Run make and capture stdout/stderr
+        result = subprocess.run(["make"], check=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    except Exception as e:
+        chal_fail(f"Error with challenge setup (REPORT THIS!): {e}")
+        return False
 
     # Parse the file for the SHA256 hash (assuming it prints like 'HASH  build/program')
     sha256_pattern = re.compile(r'\b([0-9a-f]{64})\b\s+build/program')
