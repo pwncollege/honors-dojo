@@ -2,10 +2,10 @@ name: Continuous Integration
 resources:
    - content: Getting Started
      type: header
-   - name: "[PLACEHOLDER] Intro to Continuous Integration"
+   - name: "[LECTURE PLACEHOLDER | Slides Ready] Intro to Continuous Integration"
      type: lecture
      video: dQw4w9WgXcQ
-   - name: "[PLACEHOLDER] Workflow Syntax"
+   - name: "[LECTURE PLACEHOLDER | Slides Ready] Workflow Syntax"
      type: lecture
      video: dQw4w9WgXcQ
    - id: workflow-intro
@@ -14,7 +14,7 @@ resources:
 
    - content: Integrate your Build System
      type: header
-   - name: "[PLACEHOLDER] Building your Program"
+   - name: "[LECTURE PLACEHOLDER] Building your Program"
      type: lecture
      video: dQw4w9WgXcQ
    - id: build-a-binary
@@ -26,13 +26,22 @@ resources:
 
    - content: Automated Testing
      type: header
-   - name: "[PLACEHOLDER] Running Automated Tests"
+   - name: "[LECTURE PLACEHOLDER] Running Automated Tests"
+     type: lecture
+     video: dQw4w9WgXcQ
+   - name: "[CHALLENGE PLACEHOLDER] Run a Unit Test"
+     type: lecture
+     video: dQw4w9WgXcQ
+   - name: "[CHALLENGE PLACEHOLDER] Run a Test Suite"
      type: lecture
      video: dQw4w9WgXcQ
 
    - content: Continuous Delivery
      type: header
-   - name: "[PLACEHOLDER] CD with GitHub Actions"
+   - name: "[LECTURE PLACEHOLDER] CD with GitHub Actions"
+     type: lecture
+     video: dQw4w9WgXcQ
+   - name: "[CHALLENGE PLACEHOLDER] Artifact Promotion"
      type: lecture
      video: dQw4w9WgXcQ
 #  - id: join
