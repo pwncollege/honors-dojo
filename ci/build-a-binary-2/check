@@ -33,9 +33,10 @@ def precheck_script() -> bool:
         # Run make and capture stdout/stderr
         result = subprocess.run(["make"], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     except Exception as e:
-        print(result)
         chal_fail(f"Error with challenge setup (REPORT THIS!): {e}")
         return False
+    
+    print(result)
 
     # Parse the file for the SHA256 hash (assuming it prints like 'HASH  build/program')
     sha256_pattern = re.compile(r'\b([0-9a-f]{64})\b\s+build/program')
