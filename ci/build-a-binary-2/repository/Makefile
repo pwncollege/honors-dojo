@@ -18,7 +18,6 @@ $(TARGET): $(SOURCES)
 	strip --strip-all $@
 	objcopy --adjust-section-vma .text=0 --adjust-section-vma .data=0 $@ $@.normalized
 	mv $@.normalized $@
-	rm $@.normalized
 	sha256sum $@
 
 # Clean build
