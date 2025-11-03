@@ -4,6 +4,8 @@ challenges:
      name: The Workflow .yml
    - id: build-a-binary
      name: Build a Binary
+   - id: build-a-binary-2
+     name: Build a Binary 2
 #  - id: join
 #    name: Join an IRC Server
 #  - id: join2
