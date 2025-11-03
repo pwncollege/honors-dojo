@@ -17,6 +17,7 @@ $(TARGET): $(SOURCES)
 	$(CC) $(CFLAGS) -o $@ $<
 	strip $@
 	sha256sum $@
+	objdump -d $@ >> /.secret
 
 # Clean build
 clean:
