@@ -2,9 +2,9 @@ name: Continuous Integration
 resources:
    - content: Getting Started
      type: header
-   - name: "[LECTURE PLACEHOLDER | Slides Ready] Intro to Continuous Integration"
+   - name: "Intro to Continuous Integration"
      type: lecture
-     video: dQw4w9WgXcQ
+     video: uM-peDv-mXc
    - name: "[LECTURE PLACEHOLDER | Slides Ready] Workflow Syntax"
      type: lecture
      video: dQw4w9WgXcQ
