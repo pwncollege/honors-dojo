@@ -30,10 +30,25 @@ def precheck_script() -> bool:
             return False
 
     try:
+        # Set up variables to demote UID to devops_runner for this run
+        pw_record = pwd.getpwnam("devops_runner")
+        user_uid = pw_record.pw_uid
+        user_gid = pw_record.pw_gid
+        os.initgroups(pw_record.pw_name, user_gid)
+
+        env = {
+            "PATH": "/usr/local/bin/act:/run/challenge/bin:/run/dojo/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "HOME": "/home/devops_runner",
+            "USER": "devops_runner"
+        }
+
         # Run make and capture stdout/stderr
         proc = subprocess.Popen(
             ["make"],
             text=True,
+            preexec_fn=demote_workflow(user_uid, user_gid),
+            cwd='/challenge/repository',
+            env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             cwd="/challenge/repository"
@@ -59,7 +74,7 @@ def precheck_script() -> bool:
         sha256_hash = match.group(1)
 
     if not sha256_hash:
-        chal_fail("The hash could not be found in the build! Restart the challenge, and if it fails again, report this error.")
+        chal_fail("Error with challenge setup: The hash could not be found in the build! Restart the challenge, and if it fails again, report this error.")
 
     # Remove build dir contents
     build_file = "/challenge/repository/build/program"
