@@ -47,7 +47,6 @@ def precheck_script() -> bool:
             ["make"],
             text=True,
             preexec_fn=demote_workflow(user_uid, user_gid),
-            cwd='/challenge/repository',
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -57,7 +56,7 @@ def precheck_script() -> bool:
         # Read all output line by line
         output_lines = []
         for line in proc.stdout:
-            print(line, end="")   # live print
+            # print(line, end="")   # live print
             output_lines.append(line)
         proc.wait()
     except Exception as e:
@@ -83,6 +82,13 @@ def precheck_script() -> bool:
             os.unlink(build_file)
         except Exception as e:
             chal_fail(f"Failed to remove build file: {e}")
+
+    # Check for the hash in the workflow file
+    with open('/challenge/repository/.github/workflows/ci.yml') as f:
+        file = f.read()
+        if sha256_hash in file:
+            chal_fail("Sneaky! The solution to this challenge isn't that difficult. Please at least try the intended solution first before attempting to bypass it.")
+            return False
 
     return True
 
