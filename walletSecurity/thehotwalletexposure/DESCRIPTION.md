@@ -1,1 +1,0 @@
-Locate and extract a private key stored as an environment variable using `grep` on exported shell variables.
