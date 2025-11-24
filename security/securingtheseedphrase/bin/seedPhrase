@@ -1,4 +1,85 @@
-#!/opt/pwn.college/bash
+#!/usr/bin/exec-suid -- /usr/local/bin/python -I
 
-fold -s <<< "Success! Here is your flag:"
-cat /flag
+import os
+import stat
+import sys
+
+# Expected files and values
+OBFUSCATED_FILE = os.path.expanduser("~/obfuscated_seed.txt")
+REQUIRED_PERMISSIONS = 0o600
+
+def check_file_exists():
+    """Check if the obfuscated seed file exists."""
+    if not os.path.exists(OBFUSCATED_FILE):
+        print("❌ Error: obfuscated_seed.txt not found in your home directory")
+        print("\nHint: You need to:")
+        print("  1. Create a file with a seed phrase")
+        print("  2. Obfuscate it using 'tr' command with ROT13")
+        print("  3. Save the output to obfuscated_seed.txt")
+        return False
+    return True
+
+def check_permissions():
+    """Check if file has correct permissions (600)."""
+    file_stat = os.stat(OBFUSCATED_FILE)
+    actual_perms = file_stat.st_mode & 0o777
+
+    if actual_perms != REQUIRED_PERMISSIONS:
+        print(f"❌ Incorrect permissions on obfuscated_seed.txt")
+        print(f"   Expected: 600 (rw-------)")
+        print(f"   Got:      {oct(actual_perms)[-3:]} ({stat.filemode(file_stat.st_mode)[1:]})")
+        print("\nHint: Use 'chmod 600 obfuscated_seed.txt' to set correct permissions")
+        return False
+    return True
+
+def check_content():
+    """Verify the file contains obfuscated content (not empty)."""
+    try:
+        with open(OBFUSCATED_FILE, 'r') as f:
+            content = f.read().strip()
+            if not content:
+                print("❌ Error: obfuscated_seed.txt is empty")
+                print("\nHint: Did you pipe your seed phrase through 'tr' to obfuscate it?")
+                return False
+            # Basic check: file should contain some content
+            if len(content) < 10:
+                print("❌ Error: obfuscated_seed.txt seems too short")
+                print("\nHint: Make sure you obfuscated a proper seed phrase")
+                return False
+    except Exception as e:
+        print(f"❌ Error reading file: {e}")
+        return False
+    return True
+
+def award_flag():
+    """Award the flag to the student."""
+    print("✓ File exists: obfuscated_seed.txt")
+    print("✓ Permissions correct: 600 (rw-------)")
+    print("✓ Content validated")
+    print("\n" + "="*50)
+    print("SUCCESS! Here is your flag:")
+    print("="*50)
+    try:
+        with open("/flag", 'r') as f:
+            print(f.read())
+    except FileNotFoundError:
+        print("pwn.college{DEMO_FLAG_WOULD_APPEAR_HERE}")
+        print("\n(Note: Actual flag will appear when deployed on pwn.college)")
+
+def main():
+    """Main validation logic."""
+    # Run all checks
+    if not check_file_exists():
+        sys.exit(1)
+
+    if not check_permissions():
+        sys.exit(1)
+
+    if not check_content():
+        sys.exit(1)
+
+    # All checks passed - award flag
+    award_flag()
+
+if __name__ == "__main__":
+    main()
