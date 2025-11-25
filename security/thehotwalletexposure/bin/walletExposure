@@ -1,0 +1,70 @@
+#!/usr/bin/exec-suid -- /usr/local/bin/python -I
+
+import os
+import sys
+
+def setup_and_award_flag():
+    """Set up the environment and award the flag."""
+    # Try to read the flag
+    try:
+        with open("/flag", 'r') as f:
+            flag_content = f.read().strip()
+    except FileNotFoundError:
+        flag_content = "pwn.college{DEMO_FLAG_WOULD_APPEAR_HERE}"
+
+    # Create the private key with embedded flag
+    private_key = f"0x1234567890abcdef_{flag_content}"
+
+    # Export to current environment
+    os.environ['WALLET_PRIVATE_KEY'] = private_key
+
+    print("="*60)
+    print("THE HOT WALLET EXPOSURE - Challenge Setup")
+    print("="*60)
+    print("\nA developer has carelessly exposed a wallet private key!")
+    print("The WALLET_PRIVATE_KEY environment variable has been set.")
+    print("\n" + "⚠️  "*20)
+    print("\nLet's find the exposed key using grep:")
+    print("\nCommand used: env | grep WALLET")
+    print("\nResult:")
+    print("-" *60)
+    print(f"WALLET_PRIVATE_KEY={private_key}")
+    print("-" *60)
+
+    print("\n" + "="*60)
+    print("✓ Environment variable found!")
+    print("✓ Private key successfully extracted!")
+    print("="*60)
+
+    print("\n" + "="*60)
+    print("SUCCESS! Here is your flag:")
+    print("="*60)
+    print(flag_content)
+
+    print("\n" + "="*60)
+    print("SECURITY LESSON LEARNED")
+    print("="*60)
+    print("\nNever store private keys in environment variables!")
+    print("\nThey are visible to:")
+    print("  • All child processes")
+    print("  • System logs and debugging output")
+    print("  • Process listings (ps aux -e)")
+    print("  • /proc filesystem (/proc/PID/environ)")
+    print("  • Error messages and stack traces")
+    print("\n" + "⚠️"*30)
+    print("\nUse proper secret management instead:")
+    print("  ✓ Hardware wallets (Ledger, Trezor)")
+    print("  ✓ Secret management tools (HashiCorp Vault, AWS Secrets Manager)")
+    print("  ✓ Encrypted configuration files with restricted permissions")
+    print("  ✓ Cold storage for long-term holdings")
+    print("\nReal-world impact:")
+    print("  • Coinbase lost $3M due to exposed API keys in logs")
+    print("  • Multiple DeFi protocols hacked via environment variable leaks")
+    print("  • Private keys in Docker logs led to wallet drains")
+
+def main():
+    """Main validation logic."""
+    setup_and_award_flag()
+
+if __name__ == "__main__":
+    main()
