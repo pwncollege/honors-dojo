@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Set up environment variable with private key containing the flag
+FLAG_CONTENT=$(cat /flag)
+
+# Export to hacker's environment via .bashrc
+cat >> /home/hacker/.bashrc << EOF
+
+# WARNING: Private key exposed in environment variable!
+# This is a security vulnerability for educational purposes only
+export WALLET_PRIVATE_KEY="0x1234567890abcdef_FLAG:${FLAG_CONTENT}"
+EOF
+
+# Set ownership
+chown hacker:hacker /home/hacker/.bashrc
+
+# Also create a .wallet_config file with additional exposed secrets (red herring)
+cat > /home/hacker/.wallet_config << EOF
+# Wallet Configuration (DO NOT COMMIT TO GIT)
+WALLET_ADDRESS=0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+NETWORK=mainnet
+GAS_PRICE=20
+
+# DANGER: Private key should never be here
+WALLET_PRIVATE_KEY=0x1234567890abcdef_FLAG:${FLAG_CONTENT}
+EOF
+
+chown hacker:hacker /home/hacker/.wallet_config
+chmod 600 /home/hacker/.wallet_config

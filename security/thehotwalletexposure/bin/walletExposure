@@ -3,26 +3,14 @@
 import os
 import sys
 
-def setup_environment():
-    """Set up the environment variable with the exposed private key."""
-    # Try to read the flag
-    try:
-        with open("/flag", 'r') as f:
-            flag_content = f.read().strip()
-    except FileNotFoundError:
-        flag_content = "pwn.college{DEMO_FLAG_WOULD_APPEAR_HERE}"
-
-    # Create the private key with embedded flag
-    private_key = f"0x1234567890abcdef_{flag_content}"
-
-    # Export to current environment
-    os.environ['WALLET_PRIVATE_KEY'] = private_key
-
+def main():
+    """Display challenge instructions."""
     print("="*60)
-    print("THE HOT WALLET EXPOSURE - Challenge Setup")
+    print("THE HOT WALLET EXPOSURE")
     print("="*60)
     print("\nA developer has carelessly exposed a wallet private key!")
-    print("The WALLET_PRIVATE_KEY environment variable has been set.")
+    print("The WALLET_PRIVATE_KEY environment variable is already set")
+    print("in your shell environment.")
     print("\n" + "⚠️  "*20)
     print("\n" + "="*60)
     print("YOUR TASK")
@@ -55,10 +43,6 @@ def setup_environment():
     print("  • Multiple DeFi protocols hacked via environment variable leaks")
     print("  • Private keys in Docker logs led to wallet drains")
     print("\n" + "="*60)
-
-def main():
-    """Main setup logic."""
-    setup_environment()
 
 if __name__ == "__main__":
     main()
