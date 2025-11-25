@@ -1,0 +1,263 @@
+#!/usr/bin/exec-suid -- /usr/local/bin/python -I
+
+import os
+import sys
+import random
+from datetime import datetime, timedelta
+
+def generate_timestamp():
+    """Generate a realistic timestamp."""
+    base_time = datetime(2024, 1, 15, 8, 0, 0)
+    random_offset = timedelta(seconds=random.randint(0, 43200))  # 12 hours
+    timestamp = base_time + random_offset
+    return timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
+def generate_log_entry(level, service, message):
+    """Generate a formatted log entry."""
+    timestamp = generate_timestamp()
+    return f"[{timestamp}] [{level}] {service}: {message}"
+
+def generate_realistic_logs(log_file, flag_content):
+    """Generate a realistic 50,000+ line log file with hidden API key."""
+
+    services = [
+        "WalletService", "TransactionPool", "BlockchainSync",
+        "APIGateway", "AuthService", "NetworkService",
+        "CacheService", "DatabaseService", "RateLimiter",
+        "MonitoringService", "SecurityService"
+    ]
+
+    messages = {
+        "INFO": [
+            "Service initialized successfully",
+            "Transaction added to pool: 0x{}",
+            "Block #{} synchronized",
+            "Request processed: GET /api/v1/balance",
+            "Cache hit for key: wallet_balance_{}",
+            "User authentication successful",
+            "Blockchain sync completed",
+        ],
+        "DEBUG": [
+            "Balance check for 0x{}",
+            "Wallet state updated",
+            "Cache miss for key: balance_{}",
+            "Processing transaction batch",
+            "Network peer discovered",
+        ],
+        "WARN": [
+            "Rate limit approaching for IP: 192.168.{}.{}",
+            "High memory usage detected: {}%",
+            "Slow query detected: {} ms",
+            "Connection pool near capacity",
+        ],
+        "ERROR": [
+            "Connection timeout to peer node",
+            "Invalid token provided",
+            "Transaction failed: insufficient gas",
+            "Request validation failed",
+            "Signature verification failed",
+            "Database connection lost",
+        ]
+    }
+
+    print("\n" + "="*60)
+    print("Generating 50,000+ line log file...")
+    print("="*60)
+    print("\nThis may take a moment...\n")
+
+    with open(log_file, 'w') as f:
+        line_count = 0
+
+        # Startup logs
+        for _ in range(100):
+            service = random.choice(services)
+            f.write(generate_log_entry("INFO", service, "Service initialized successfully") + "\n")
+            line_count += 1
+
+        # Normal operational logs (bulk of the file)
+        for _ in range(10000):
+            level = random.choice(["INFO", "INFO", "INFO", "DEBUG", "DEBUG", "WARN"])
+            service = random.choice(services)
+            message_template = random.choice(messages[level])
+
+            # Fill in placeholders
+            if "{}" in message_template:
+                if "0x" in message_template:
+                    message = message_template.format(''.join(random.choices('0123456789abcdef', k=16)))
+                elif "%" in message_template:
+                    message = message_template.format(random.randint(60, 95))
+                elif "ms" in message_template:
+                    message = message_template.format(random.randint(100, 5000))
+                elif "192.168" in message_template:
+                    message = message_template.format(random.randint(1, 255), random.randint(1, 255))
+                elif "Block" in message_template:
+                    message = message_template.format(random.randint(1000000, 9999999))
+                else:
+                    message = message_template.format(''.join(random.choices('0123456789abcdef', k=8)))
+            else:
+                message = message_template
+
+            f.write(generate_log_entry(level, service, message) + "\n")
+            line_count += 1
+
+        # Add ERROR logs before the breach
+        for _ in range(500):
+            service = random.choice(services)
+            message = random.choice(messages["ERROR"])
+            f.write(generate_log_entry("ERROR", service, message) + "\n")
+            line_count += 1
+
+        # THE CRITICAL BREACH LOG - Hidden among errors
+        breach_timestamp = datetime(2024, 1, 15, 10, 23, 47).strftime("%Y-%m-%d %H:%M:%S")
+        breach_log = f"[{breach_timestamp}] [ERROR] APIGateway: UNAUTHORIZED access attempt detected - API_KEY=sk_live_BREACH_{flag_content} used without proper authentication"
+        f.write(breach_log + "\n")
+        line_count += 1
+
+        # Add more logs after the breach to bury it
+        for _ in range(40000):
+            level = random.choice(["INFO", "INFO", "DEBUG", "DEBUG", "WARN", "ERROR"])
+            service = random.choice(services)
+            message_template = random.choice(messages[level])
+
+            # Fill in placeholders
+            if "{}" in message_template:
+                if "0x" in message_template:
+                    message = message_template.format(''.join(random.choices('0123456789abcdef', k=16)))
+                elif "%" in message_template:
+                    message = message_template.format(random.randint(60, 95))
+                elif "ms" in message_template:
+                    message = message_template.format(random.randint(100, 5000))
+                elif "192.168" in message_template:
+                    message = message_template.format(random.randint(1, 255), random.randint(1, 255))
+                elif "Block" in message_template:
+                    message = message_template.format(random.randint(1000000, 9999999))
+                else:
+                    message = message_template.format(''.join(random.choices('0123456789abcdef', k=8)))
+            else:
+                message = message_template
+
+            f.write(generate_log_entry(level, service, message) + "\n")
+            line_count += 1
+
+    print(f"✓ Generated {line_count:,} log lines")
+    print(f"✓ File size: {os.path.getsize(log_file) / 1024 / 1024:.2f} MB")
+    return line_count
+
+def setup_and_award_flag():
+    """Generate the log file and award the flag."""
+    # Try to read the flag
+    try:
+        with open("/flag", 'r') as f:
+            flag_content = f.read().strip()
+    except FileNotFoundError:
+        flag_content = "pwn.college{DEMO_FLAG_WOULD_APPEAR_HERE}"
+
+    # Create log file in home directory
+    home_dir = os.path.expanduser("~")
+    log_file = os.path.join(home_dir, "web3_server.log")
+
+    print("="*60)
+    print("API KEY LOG FORENSICS - Challenge Setup")
+    print("="*60)
+    print("\nScenario:")
+    print("  Yesterday morning, attackers drained $500,000 from the")
+    print("  company's hot wallet using an unauthorized API key.")
+    print("\n  Your job: Find the compromised API key that was")
+    print("  accidentally logged during the security incident.")
+    print("\n" + "🔍"*30)
+
+    # Generate the log file
+    line_count = generate_realistic_logs(log_file, flag_content)
+
+    print("\n" + "="*60)
+    print(f"Log file created: {log_file}")
+    print("="*60)
+
+    print("\n" + "💡"*30)
+    print("\nInvestigation Strategy:")
+    print("\n  1. Start by counting total lines:")
+    print(f"     wc -l {log_file}")
+    print(f"\n  2. Filter for ERROR logs (should reduce to ~500 lines):")
+    print(f"     grep 'ERROR' {log_file} | wc -l")
+    print(f"\n  3. Further filter for UNAUTHORIZED:")
+    print(f"     grep 'ERROR' {log_file} | grep 'UNAUTHORIZED'")
+    print(f"\n  4. Finally, extract the API_KEY:")
+    print(f"     grep 'ERROR' {log_file} | grep 'UNAUTHORIZED' | grep 'API_KEY'")
+    print("\n" + "💡"*30)
+
+    print("\n" + "🔎"*30)
+    print("\nLet's run the investigation:")
+    print("-"*60)
+
+    # Run the grep pipeline
+    import subprocess
+    try:
+        # First show total lines
+        result = subprocess.run(['wc', '-l', log_file], capture_output=True, text=True)
+        print(f"\nTotal log lines: {result.stdout.strip()}")
+
+        # Show ERROR count
+        result = subprocess.run(
+            f"grep 'ERROR' {log_file} | wc -l",
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+        print(f"ERROR level logs: {result.stdout.strip()} lines")
+
+        # Show the breach log
+        result = subprocess.run(
+            f"grep 'ERROR' {log_file} | grep 'UNAUTHORIZED' | grep 'API_KEY'",
+            shell=True,
+            capture_output=True,
+            text=True
+        )
+        print(f"\nBreach log entry found:")
+        print(result.stdout)
+
+    except Exception as e:
+        print(f"\n(Commands above show the investigation process)")
+
+    print("-"*60)
+
+    print("\n" + "="*60)
+    print("✓ Compromised API key located!")
+    print("✓ Forensics investigation complete!")
+    print("="*60)
+
+    print("\n" + "="*60)
+    print("SUCCESS! Here is your flag:")
+    print("="*60)
+    print(flag_content)
+
+    print("\n" + "="*60)
+    print("SECURITY LESSON LEARNED")
+    print("="*60)
+    print("\nWhy this breach happened:")
+    print("  • Developer left debug logging enabled in production")
+    print("  • Error handler printed full request context")
+    print("  • API key included in error message")
+    print("  • No log sanitization in place")
+    print("\n" + "⚠️"*30)
+    print("\nHow to prevent API key leaks in logs:")
+    print("\n  ✅ Implement log sanitization middleware")
+    print("  ✅ Use secret management services (Vault, AWS Secrets Manager)")
+    print("  ✅ Redact sensitive fields before logging: API_KEY=***REDACTED***")
+    print("  ✅ Review all logging statements before deployment")
+    print("  ✅ Set up automated secret scanning (GitGuardian, TruffleHog)")
+    print("  ✅ Encrypt logs at rest")
+    print("  ✅ Restrict log access with IAM policies")
+    print("  ✅ Regular security audits of logging practices")
+    print("\nReal-world impact:")
+    print("  • Uber: $148M settlement (AWS keys in logs)")
+    print("  • Capital One: $80M fine (logs exposed 100M records)")
+    print("  • DeFi Protocol: $3.6M stolen (API key in error messages)")
+    print("\n💡 Remember: Logs are permanent. Once a secret is logged,")
+    print("   assume it's compromised. Rotate immediately!")
+
+def main():
+    """Main validation logic."""
+    setup_and_award_flag()
+
+if __name__ == "__main__":
+    main()
