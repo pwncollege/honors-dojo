@@ -3,214 +3,78 @@
 import os
 import sys
 
-def create_transaction_file():
-    """Create a sample transaction JSON file."""
-    return '''{
-  "from": "0x1a2b3c4d5e6f7890abcdef1234567890abcdef12",
-  "to": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+TRANSACTION_FILE = os.path.expanduser("~/transaction.txt")
+VALID_SIG_FILE = os.path.expanduser("~/valid_signature.txt")
+INVALID_SIG_FILE = os.path.expanduser("~/invalid_signature.txt")
+
+def setup_files():
+    """Create signature files on first run."""
+    if not all(os.path.exists(f) for f in [TRANSACTION_FILE, VALID_SIG_FILE, INVALID_SIG_FILE]):
+        # Create transaction file
+        with open(TRANSACTION_FILE, 'w') as f:
+            f.write('''{
+  "from": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  "to": "0x1234567890123456789012345678901234567890",
   "value": "1500000000000000000",
-  "nonce": 42,
-  "gasLimit": 21000,
-  "gasPrice": "20000000000",
-  "chainId": 1,
-  "data": "0x"
-}'''
+  "nonce": 42
+}''')
 
-def create_valid_signature():
-    """Create a valid Ethereum signature (66 characters)."""
-    # 0x + 64 hex characters = 66 total
-    return "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+        # Create valid signature (66 characters)
+        with open(VALID_SIG_FILE, 'w') as f:
+            f.write("0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef12345678")
 
-def create_invalid_signature():
-    """Create an invalid signature (wrong length)."""
-    return "0xINVALID"
+        # Create invalid signature
+        with open(INVALID_SIG_FILE, 'w') as f:
+            f.write("0xINVALID")
 
-def create_validation_template(flag_content):
-    """Create a template validation script for students."""
-    return f'''#!/bin/bash
+        print("Signature files created:")
+        print(f"  - {TRANSACTION_FILE}")
+        print(f"  - {VALID_SIG_FILE} (66 characters)")
+        print(f"  - {INVALID_SIG_FILE} (invalid length)")
+        print("\nWrite a validation script that:")
+        print("  1. Reads a signature file (passed as argument)")
+        print("  2. Checks if signature is exactly 66 characters")
+        print("  3. Awards flag if valid")
+        sys.exit(0)
 
-# SIGNATURE VALIDATION SCRIPT
-# This script validates Ethereum signature format
+def check_files_exist():
+    """Verify all files exist."""
+    missing = [f for f in [TRANSACTION_FILE, VALID_SIG_FILE, INVALID_SIG_FILE] if not os.path.exists(f)]
+    if missing:
+        print("Error: Missing files:")
+        for f in missing:
+            print(f"  - {f}")
+        print("\nRun this command again to create them")
+        return False
+    return True
 
-# Read the transaction (for context)
-TRANSACTION_FILE="$HOME/transaction.txt"
-if [ ! -f "$TRANSACTION_FILE" ]; then
-    echo "Error: transaction.txt not found"
-    exit 1
-fi
-
-# Get signature filename from first argument
-if [ -z "$1" ]; then
-    echo "Usage: ./validate.sh <signature_file>"
-    echo "Example: ./validate.sh ~/valid_signature.txt"
-    exit 1
-fi
-
+def award_flag():
+    """Award the flag."""
+    print("✓ Files created successfully")
+    print("\n" + "="*50)
+    print("Write a bash script that validates signatures:")
+    print("="*50)
+    print("""
+#!/bin/bash
 SIGNATURE_FILE=$1
-
-# Check if signature file exists
-if [ ! -f "$SIGNATURE_FILE" ]; then
-    echo "Error: Signature file not found: $SIGNATURE_FILE"
-    exit 1
-fi
-
-# Read the signature content
 SIGNATURE=$(cat "$SIGNATURE_FILE")
-
-# Count signature length (remove newlines)
 SIG_LENGTH=$(echo -n "$SIGNATURE" | wc -c)
 
-# Ethereum signatures must be exactly 66 characters
-# Format: 0x (2 chars) + 64 hex characters = 66 total
-REQUIRED_LENGTH=66
-
-echo "=================================="
-echo "ETHEREUM SIGNATURE VALIDATOR"
-echo "=================================="
-echo ""
-echo "Signature file: $SIGNATURE_FILE"
-echo "Signature: $SIGNATURE"
-echo "Length: $SIG_LENGTH characters"
-echo "Required: $REQUIRED_LENGTH characters"
-echo ""
-
-# Validate length
-if [ $SIG_LENGTH -eq $REQUIRED_LENGTH ]; then
-    echo "✓ Valid signature format!"
-    echo "✓ Length correct: 66 characters"
-    echo "✓ Transaction can proceed"
-    echo ""
-    echo "=================================="
-    echo "SUCCESS! Here is your flag:"
-    echo "=================================="
-    echo "{flag_content}"
-    echo ""
-    echo "=================================="
-    echo "WHAT YOU LEARNED"
-    echo "=================================="
-    echo ""
-    echo "Conditional Logic:"
-    echo "  • if/then/else statements in bash"
-    echo "  • Numeric comparison with -eq"
-    echo "  • Variable assignment and substitution"
-    echo "  • Command line arguments ($1)"
-    echo ""
-    echo "Signature Validation:"
-    echo "  • Ethereum signatures are 66 characters"
-    echo "  • Format: 0x + 64 hex digits"
-    echo "  • Always validate before crypto operations"
-    echo "  • Early rejection saves gas and computation"
-    exit 0
+if [ $SIG_LENGTH -eq 66 ]; then
+    echo "✓ Valid signature!"
+    cat /flag
 else
-    echo "✗ Invalid signature format"
-    echo "✗ Expected: $REQUIRED_LENGTH characters"
-    echo "✗ Got: $SIG_LENGTH characters"
-    echo "✗ Transaction rejected"
-    echo ""
-    echo "Hint: Ethereum signatures must be exactly 66 characters"
-    echo "      Format: 0x + 64 hexadecimal characters"
-    exit 1
+    echo "✗ Invalid signature length: $SIG_LENGTH"
 fi
-'''
-
-def setup_and_award_flag():
-    """Create challenge files and award the flag."""
-    # Try to read the flag
-    try:
-        with open("/flag", 'r') as f:
-            flag_content = f.read().strip()
-    except FileNotFoundError:
-        flag_content = "pwn.college{DEMO_FLAG_WOULD_APPEAR_HERE}"
-
-    # Create files in home directory
-    home_dir = os.path.expanduser("~")
-    transaction_path = os.path.join(home_dir, "transaction.txt")
-    valid_sig_path = os.path.join(home_dir, "valid_signature.txt")
-    invalid_sig_path = os.path.join(home_dir, "invalid_signature.txt")
-    template_path = os.path.join(home_dir, "validate.sh")
-
-    # Write the files
-    with open(transaction_path, 'w') as f:
-        f.write(create_transaction_file())
-
-    with open(valid_sig_path, 'w') as f:
-        f.write(create_valid_signature())
-
-    with open(invalid_sig_path, 'w') as f:
-        f.write(create_invalid_signature())
-
-    with open(template_path, 'w') as f:
-        f.write(create_validation_template(flag_content))
-
-    # Make the validation script executable
-    os.chmod(template_path, 0o755)
-
-    print("="*60)
-    print("BASIC SIGNATURE VALIDATION - Challenge Setup")
-    print("="*60)
-    print("\nFiles created in your home directory:")
-    print(f"  • {transaction_path}")
-    print(f"  • {valid_sig_path}")
-    print(f"  • {invalid_sig_path}")
-    print(f"  • {template_path} (validation script)")
-    print("\n" + "🔐"*30)
-    print("\nScenario:")
-    print("  You're building a Web3 transaction validator.")
-    print("  Before expensive cryptographic verification, you need")
-    print("  to check if signatures have the correct format.")
-    print("\n  Ethereum signatures must be exactly 66 characters:")
-    print("    • 0x prefix (2 characters)")
-    print("    • 64 hexadecimal characters")
-    print("\n" + "💡"*30)
-
-    print("\nThe validation script (validate.sh) has been created for you!")
-    print("It implements the complete validation logic.")
-    print("\nLet's test it with both signatures:")
-    print("\n" + "-"*60)
-
-    # Test with valid signature
-    print("\n1. Testing with VALID signature (66 characters):")
-    print(f"   Command: ./validate.sh {valid_sig_path}")
-    print("\n" + "-"*30)
-    os.system(f"cd {home_dir} && ./validate.sh {valid_sig_path}")
-
-    print("\n" + "-"*60)
-
-    # Test with invalid signature
-    print("\n2. Testing with INVALID signature (wrong length):")
-    print(f"   Command: ./validate.sh {invalid_sig_path}")
-    print("\n" + "-"*30)
-    os.system(f"cd {home_dir} && ./validate.sh {invalid_sig_path}")
-
-    print("\n" + "="*60)
-    print("SECURITY LESSON LEARNED")
-    print("="*60)
-    print("\nWhy validate signatures before verification?")
-    print("\n  Performance:")
-    print("    • ECDSA verification is computationally expensive")
-    print("    • Early rejection saves CPU cycles")
-    print("    • On Ethereum, saves gas costs")
-    print("\n  Security:")
-    print("    • Prevents malformed input attacks")
-    print("    • Protects against DoS (denial of service)")
-    print("    • Provides clear error messages")
-    print("\n  Best Practices:")
-    print("    • Always validate input format first")
-    print("    • Check length, encoding, structure")
-    print("    • Use well-tested crypto libraries")
-    print("    • Never implement your own ECDSA")
-    print("\n" + "⚠️"*30)
-    print("\nReal-world signature validation:")
-    print("  • ethers.js: verifyMessage()")
-    print("  • web3.py: Account.recover_message()")
-    print("  • Solidity: ecrecover()")
-    print("  • Hardware wallets: On-device verification")
-    print("\nRemember: In Web3, signatures = authorization = money!")
-    print("One invalid signature verification could mean loss of funds.")
+""")
+    print("\nTest with:")
+    print(f"  ./validate.sh {VALID_SIG_FILE}")
 
 def main():
-    """Main validation logic."""
-    setup_and_award_flag()
+    setup_files()
+    if not check_files_exist():
+        sys.exit(1)
+    award_flag()
 
 if __name__ == "__main__":
     main()

@@ -88,7 +88,7 @@ The private key is still exposed in the environment, and you need to find it bef
 
 ## Your Task
 
-The environment has already been set up with the exposed `WALLET_PRIVATE_KEY` variable.
+Run `bin/walletExposure` to set up the challenge environment. This will export the `WALLET_PRIVATE_KEY` variable to your shell configuration.
 
 Use `grep` to search through the environment variables and locate the exposed `WALLET_PRIVATE_KEY`.
 
