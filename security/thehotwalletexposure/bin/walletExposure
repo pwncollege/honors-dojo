@@ -3,8 +3,8 @@
 import os
 import sys
 
-def setup_and_award_flag():
-    """Set up the environment and award the flag."""
+def setup_environment():
+    """Set up the environment variable with the exposed private key."""
     # Try to read the flag
     try:
         with open("/flag", 'r') as f:
@@ -24,25 +24,18 @@ def setup_and_award_flag():
     print("\nA developer has carelessly exposed a wallet private key!")
     print("The WALLET_PRIVATE_KEY environment variable has been set.")
     print("\n" + "⚠️  "*20)
-    print("\nLet's find the exposed key using grep:")
-    print("\nCommand used: env | grep WALLET")
-    print("\nResult:")
-    print("-" *60)
-    print(f"WALLET_PRIVATE_KEY={private_key}")
-    print("-" *60)
-
     print("\n" + "="*60)
-    print("✓ Environment variable found!")
-    print("✓ Private key successfully extracted!")
+    print("YOUR TASK")
     print("="*60)
-
+    print("\nUse grep to search through the environment variables")
+    print("and locate the exposed WALLET_PRIVATE_KEY.")
+    print("\nHints:")
+    print("  • Use the 'env' command to list all environment variables")
+    print("  • Pipe the output to 'grep' to search for patterns")
+    print("  • Try: env | grep WALLET")
+    print("\nThe flag is embedded in the private key value.")
     print("\n" + "="*60)
-    print("SUCCESS! Here is your flag:")
-    print("="*60)
-    print(flag_content)
-
-    print("\n" + "="*60)
-    print("SECURITY LESSON LEARNED")
+    print("SECURITY REMINDER")
     print("="*60)
     print("\nNever store private keys in environment variables!")
     print("\nThey are visible to:")
@@ -61,10 +54,11 @@ def setup_and_award_flag():
     print("  • Coinbase lost $3M due to exposed API keys in logs")
     print("  • Multiple DeFi protocols hacked via environment variable leaks")
     print("  • Private keys in Docker logs led to wallet drains")
+    print("\n" + "="*60)
 
 def main():
-    """Main validation logic."""
-    setup_and_award_flag()
+    """Main setup logic."""
+    setup_environment()
 
 if __name__ == "__main__":
     main()
