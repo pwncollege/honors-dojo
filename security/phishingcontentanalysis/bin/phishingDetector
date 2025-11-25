@@ -3,9 +3,22 @@
 import os
 import sys
 
-def create_legitimate_html():
-    """Create the legitimate MetaMask HTML file."""
-    return '''<!DOCTYPE html>
+LEGIT_FILE = os.path.expanduser("~/legitimate_metamask.html")
+PHISHING_FILE = os.path.expanduser("~/phishing_metamask.html")
+
+def setup_files():
+    """Create HTML files on first run."""
+    if not os.path.exists(LEGIT_FILE) or not os.path.exists(PHISHING_FILE):
+        # Get flag
+        try:
+            with open("/flag", 'r') as f:
+                flag = f.read().strip()
+        except FileNotFoundError:
+            flag = "pwn.college{demo_phishing_flag}"
+
+        # Create legitimate file
+        with open(LEGIT_FILE, 'w') as f:
+            f.write('''<!DOCTYPE html>
 <html>
 <head>
     <title>MetaMask - Confirm Transaction</title>
@@ -20,7 +33,6 @@ def create_legitimate_html():
         .value { font-size: 18px; font-weight: 600; margin: 8px 0 15px 0; color: #24292e; word-break: break-all; }
         .confirm-btn { background: #f6851b; color: white; padding: 16px; width: 100%; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         .confirm-btn:hover { background: #e47316; }
-        .reject-btn { background: white; color: #6a737d; padding: 16px; width: 100%; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -55,14 +67,13 @@ def create_legitimate_html():
         </div>
 
         <button class="confirm-btn">Confirm</button>
-        <button class="reject-btn">Reject</button>
     </div>
 </body>
-</html>'''
+</html>''')
 
-def create_phishing_html(flag_content):
-    """Create the phishing MetaMask HTML file with malicious wallet address."""
-    return f'''<!DOCTYPE html>
+        # Create phishing file
+        with open(PHISHING_FILE, 'w') as f:
+            f.write(f'''<!DOCTYPE html>
 <html>
 <head>
     <title>MetaMask - Confirm Transaction</title>
@@ -77,7 +88,6 @@ def create_phishing_html(flag_content):
         .value {{ font-size: 18px; font-weight: 600; margin: 8px 0 15px 0; color: #24292e; word-break: break-all; }}
         .confirm-btn {{ background: #f6851b; color: white; padding: 16px; width: 100%; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }}
         .confirm-btn:hover {{ background: #e47316; }}
-        .reject-btn {{ background: white; color: #6a737d; padding: 16px; width: 100%; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }}
     </style>
 </head>
 <body>
@@ -93,7 +103,7 @@ def create_phishing_html(flag_content):
 
         <div class="tx-details">
             <div class="label">TO</div>
-            <div class="value">0xDEADBEEF_PHISHING_{flag_content}</div>
+            <div class="value">0xDEADBEEF_PHISHING_{flag}</div>
         </div>
 
         <div class="tx-details">
@@ -112,121 +122,45 @@ def create_phishing_html(flag_content):
         </div>
 
         <button class="confirm-btn">Confirm</button>
-        <button class="reject-btn">Reject</button>
     </div>
 </body>
-</html>'''
+</html>''')
 
-def setup_and_award_flag():
-    """Create the HTML files and award the flag."""
-    # Try to read the flag
+        print(f"Files created:")
+        print(f"  - {LEGIT_FILE}")
+        print(f"  - {PHISHING_FILE}")
+        print("\nUse 'diff' to compare them and find the phishing address.")
+        sys.exit(0)
+
+def check_files_exist():
+    """Verify both files exist."""
+    if not os.path.exists(LEGIT_FILE) or not os.path.exists(PHISHING_FILE):
+        print("Error: Phishing detection files not found")
+        print("\nRun this command again to create them")
+        return False
+    return True
+
+def award_flag():
+    """Award the flag."""
+    print("✓ Files exist - you can now use diff to compare them")
+    print("\n" + "="*50)
+    print("Use: diff legitimate_metamask.html phishing_metamask.html")
+    print("Look for the changed wallet address containing the flag")
+    print("="*50)
+
+    # Show a hint
     try:
         with open("/flag", 'r') as f:
-            flag_content = f.read().strip()
+            flag = f.read().strip()
+        print(f"\nThe phishing address contains: {flag}")
     except FileNotFoundError:
-        flag_content = "pwn.college{DEMO_FLAG_WOULD_APPEAR_HERE}"
-
-    # Create files in home directory
-    home_dir = os.path.expanduser("~")
-    legitimate_path = os.path.join(home_dir, "legitimate_metamask.html")
-    phishing_path = os.path.join(home_dir, "phishing_metamask.html")
-
-    # Write the HTML files
-    with open(legitimate_path, 'w') as f:
-        f.write(create_legitimate_html())
-
-    with open(phishing_path, 'w') as f:
-        f.write(create_phishing_html(flag_content))
-
-    print("="*60)
-    print("PHISHING CONTENT ANALYSIS - Challenge Setup")
-    print("="*60)
-    print("\nTwo HTML files have been created:")
-    print(f"  1. {legitimate_path}")
-    print(f"  2. {phishing_path}")
-    print("\n" + "🎭"*30)
-    print("\nScenario:")
-    print("  Multiple users reported losing funds after 'confirming'")
-    print("  MetaMask transactions. You've obtained both the legitimate")
-    print("  and phishing HTML pages.")
-    print("\n  The phishing page looks IDENTICAL to MetaMask's real UI,")
-    print("  but somewhere in the code, the destination wallet address")
-    print("  has been changed to steal user funds.")
-    print("\n" + "🔍"*30)
-    print("\nLet's use diff to find the malicious change:")
-    print("\nCommand: diff legitimate_metamask.html phishing_metamask.html")
-    print("\nLet's filter to show only the phishing file's changes:")
-    print("Command: diff legitimate_metamask.html phishing_metamask.html | grep '>'")
-    print("\n" + "-"*60)
-
-    # Run diff and show output
-    import subprocess
-    try:
-        result = subprocess.run(
-            ['diff', legitimate_path, phishing_path],
-            capture_output=True,
-            text=True
-        )
-        # diff returns non-zero when files differ, which is expected
-        if result.stdout:
-            print("\nDiff output:")
-            print(result.stdout)
-
-        # Now show just the phishing line
-        result2 = subprocess.run(
-            f"diff {legitimate_path} {phishing_path} | grep '>'",
-            shell=True,
-            capture_output=True,
-            text=True
-        )
-        print("\nPhishing line (grep '>'):")
-        print(result2.stdout)
-
-    except Exception as e:
-        print(f"\nNote: diff command output shown above")
-
-    print("-"*60)
-
-    print("\n" + "="*60)
-    print("✓ Phishing destination wallet found!")
-    print("✓ Malicious address identified!")
-    print("="*60)
-
-    print("\n" + "="*60)
-    print("SUCCESS! Here is your flag:")
-    print("="*60)
-    print(flag_content)
-
-    print("\n" + "="*60)
-    print("SECURITY LESSON LEARNED")
-    print("="*60)
-    print("\nPhishing attacks in crypto are devastating because:")
-    print("  • Transactions are irreversible")
-    print("  • No customer support to reverse fraud")
-    print("  • Attackers can create pixel-perfect clones")
-    print("  • One character different in a 42-char address is hard to spot")
-    print("\n" + "⚠️"*30)
-    print("\nHow the attack works:")
-    print("  1. Attacker clones legitimate website (MetaMask, Uniswap, etc.)")
-    print("  2. Changes destination wallet address to their own")
-    print("  3. Buys Google ads or sends phishing emails")
-    print("  4. Victims think they're on real site")
-    print("  5. Funds sent to attacker's wallet")
-    print("\nDefend yourself:")
-    print("  ✓ Bookmark legitimate sites, never click email links")
-    print("  ✓ Verify URLs character by character")
-    print("  ✓ Use hardware wallet with on-device address verification")
-    print("  ✓ Enable transaction simulation (Pocket Universe, Fire)")
-    print("  ✓ Check SSL certificates")
-    print("  ✓ Never enter seed phrases on websites")
-    print("\nReal victims:")
-    print("  • $8M stolen via fake Uniswap interface (2023)")
-    print("  • Thousands lost funds to MetaMask phishing (2022)")
-    print("  • OpenSea NFT phishing campaign (2022)")
+        print("\nThe phishing address contains: pwn.college{demo_phishing_flag}")
 
 def main():
-    """Main validation logic."""
-    setup_and_award_flag()
+    setup_files()
+    if not check_files_exist():
+        sys.exit(1)
+    award_flag()
 
 if __name__ == "__main__":
     main()
