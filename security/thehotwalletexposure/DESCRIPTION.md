@@ -88,9 +88,11 @@ The private key is still exposed in the environment, and you need to find it bef
 
 ## Your Task
 
-Run the `walletExposure` command to begin the challenge. It will set up the vulnerable environment for you.
+The environment has already been set up with the exposed `WALLET_PRIVATE_KEY` variable.
 
-Then, use `grep` to search through the environment variables and locate the exposed `WALLET_PRIVATE_KEY`.
+Use `grep` to search through the environment variables and locate the exposed `WALLET_PRIVATE_KEY`.
+
+**Optional:** Run the `walletExposure` command to see challenge instructions and hints.
 
 **The flag is embedded in the private key value.**
 
