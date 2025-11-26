@@ -71,7 +71,7 @@ def setup_files():
 </body>
 </html>''')
 
-        # Create phishing file
+        # Create phishing file with flag embedded in the wallet address
         with open(PHISHING_FILE, 'w') as f:
             f.write(f'''<!DOCTYPE html>
 <html>
@@ -129,7 +129,10 @@ def setup_files():
         print(f"Files created:")
         print(f"  - {LEGIT_FILE}")
         print(f"  - {PHISHING_FILE}")
-        print("\nUse 'diff' to compare them and find the phishing address.")
+        print("\nUse 'diff' to compare them and find the phishing address:")
+        print(f"  diff {LEGIT_FILE} {PHISHING_FILE}")
+        print("\nOr filter to see only the changed line:")
+        print(f"  diff {LEGIT_FILE} {PHISHING_FILE} | grep '>'")
         sys.exit(0)
 
 def check_files_exist():
@@ -140,27 +143,15 @@ def check_files_exist():
         return False
     return True
 
-def award_flag():
-    """Award the flag."""
-    print("✓ Files exist - you can now use diff to compare them")
-    print("\n" + "="*50)
-    print("Use: diff legitimate_metamask.html phishing_metamask.html")
-    print("Look for the changed wallet address containing the flag")
-    print("="*50)
-
-    # Show a hint
-    try:
-        with open("/flag", 'r') as f:
-            flag = f.read().strip()
-        print(f"\nThe phishing address contains: {flag}")
-    except FileNotFoundError:
-        print("\nThe phishing address contains: pwn.college{demo_phishing_flag}")
-
 def main():
     setup_files()
     if not check_files_exist():
         sys.exit(1)
-    award_flag()
+    
+    # Files exist, just provide instructions
+    print("✓ Files already exist")
+    print("\nUse diff to compare the files and find the malicious wallet address:")
+    print(f"  diff {LEGIT_FILE} {PHISHING_FILE}")
 
 if __name__ == "__main__":
     main()
