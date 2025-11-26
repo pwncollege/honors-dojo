@@ -7,15 +7,8 @@ LEGIT_FILE = "/home/hacker/legitimate_metamask.html"
 PHISHING_FILE = "/home/hacker/phishing_metamask.html"
 
 def setup_files():
-    """Create HTML files on first run."""
+    """Create HTML files without the flag."""
     if not os.path.exists(LEGIT_FILE) or not os.path.exists(PHISHING_FILE):
-        # Get flag
-        try:
-            with open("/flag", 'r') as f:
-                flag = f.read().strip()
-        except FileNotFoundError:
-            flag = "pwn.college{demo_phishing_flag}"
-
         # Create legitimate file
         with open(LEGIT_FILE, 'w') as f:
             f.write('''<!DOCTYPE html>
@@ -71,23 +64,23 @@ def setup_files():
 </body>
 </html>''')
 
-        # Create phishing file with flag embedded in the wallet address
+        # Create phishing file with ATTACKER address (no flag yet)
         with open(PHISHING_FILE, 'w') as f:
-            f.write(f'''<!DOCTYPE html>
+            f.write('''<!DOCTYPE html>
 <html>
 <head>
     <title>MetaMask - Confirm Transaction</title>
     <style>
-        body {{ font-family: Arial, sans-serif; background: #f6f6f6; margin: 0; padding: 20px; }}
-        .container {{ max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-        .logo {{ color: #f6851b; font-size: 28px; font-weight: bold; margin-bottom: 10px; }}
-        .fox-icon {{ font-size: 40px; margin-bottom: 15px; }}
-        h2 {{ margin: 20px 0; color: #24292e; }}
-        .tx-details {{ margin: 25px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }}
-        .label {{ color: #6a737d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }}
-        .value {{ font-size: 18px; font-weight: 600; margin: 8px 0 15px 0; color: #24292e; word-break: break-all; }}
-        .confirm-btn {{ background: #f6851b; color: white; padding: 16px; width: 100%; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }}
-        .confirm-btn:hover {{ background: #e47316; }}
+        body { font-family: Arial, sans-serif; background: #f6f6f6; margin: 0; padding: 20px; }
+        .container { max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .logo { color: #f6851b; font-size: 28px; font-weight: bold; margin-bottom: 10px; }
+        .fox-icon { font-size: 40px; margin-bottom: 15px; }
+        h2 { margin: 20px 0; color: #24292e; }
+        .tx-details { margin: 25px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .label { color: #6a737d; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .value { font-size: 18px; font-weight: 600; margin: 8px 0 15px 0; color: #24292e; word-break: break-all; }
+        .confirm-btn { background: #f6851b; color: white; padding: 16px; width: 100%; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .confirm-btn:hover { background: #e47316; }
     </style>
 </head>
 <body>
@@ -103,7 +96,7 @@ def setup_files():
 
         <div class="tx-details">
             <div class="label">TO</div>
-            <div class="value">0xDEADBEEF_PHISHING_{flag}</div>
+            <div class="value">0xDEADBEEFATTACKER1234567890ABCDEF</div>
         </div>
 
         <div class="tx-details">
@@ -126,32 +119,132 @@ def setup_files():
 </body>
 </html>''')
 
-        print(f"Files created:")
+        # Set proper ownership
+        os.chown(LEGIT_FILE, 1000, 1000)  # hacker user
+        os.chown(PHISHING_FILE, 1000, 1000)
+        
+        print("Files created:")
         print(f"  - {LEGIT_FILE}")
         print(f"  - {PHISHING_FILE}")
-        print("\nUse 'diff' to compare them and find the phishing address:")
-        print(f"  diff {LEGIT_FILE} {PHISHING_FILE}")
-        print("\nOr filter to see only the changed line:")
-        print(f"  diff {LEGIT_FILE} {PHISHING_FILE} | grep '>'")
+        print("\n" + "="*60)
+        print("CHALLENGE INSTRUCTIONS")
+        print("="*60)
+        print("\nUse 'diff' to analyze the differences between the files.")
+        print("Practice these commands to understand the phishing attack:")
+        print("\n1. Basic diff:")
+        print(f"   diff {LEGIT_FILE} {PHISHING_FILE}")
+        print("\n2. Show only phishing file changes (>):")
+        print(f"   diff {LEGIT_FILE} {PHISHING_FILE} | grep '>'")
+        print("\n3. Show only legitimate file content (<):")
+        print(f"   diff {LEGIT_FILE} {PHISHING_FILE} | grep '<'")
+        print("\n4. Show wallet addresses (0x):")
+        print(f"   diff {LEGIT_FILE} {PHISHING_FILE} | grep '0x'")
+        print("\n" + "="*60)
+        print("After exploring with diff, identify the malicious address")
+        print("and run this script again to verify your findings.")
+        print("="*60)
         sys.exit(0)
 
-def check_files_exist():
-    """Verify both files exist."""
-    if not os.path.exists(LEGIT_FILE) or not os.path.exists(PHISHING_FILE):
-        print("Error: Phishing detection files not found")
-        print("\nRun this command again to create them")
+def ask_questions():
+    """Ask student questions to verify they used diff properly."""
+    print("\n" + "="*60)
+    print("PHISHING ANALYSIS VERIFICATION")
+    print("="*60)
+    
+    # Question 1: What's the legitimate address?
+    print("\nQuestion 1: What is the LEGITIMATE destination address?")
+    print("(Hint: Use 'diff ... | grep \"<\"' to see legitimate content)")
+    answer1 = input("Enter the address: ").strip()
+    
+    if "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb" not in answer1:
+        print("\n✗ Incorrect. Try using: diff ... | grep '<' | grep '0x'")
         return False
+    
+    print("✓ Correct!")
+    
+    # Question 2: What's the phishing address?
+    print("\nQuestion 2: What is the PHISHING destination address?")
+    print("(Hint: Use 'diff ... | grep \">\"' to see phishing content)")
+    answer2 = input("Enter the address: ").strip()
+    
+    if "0xDEADBEEFATTACKER" not in answer2:
+        print("\n✗ Incorrect. Try using: diff ... | grep '>' | grep '0x'")
+        return False
+    
+    print("✓ Correct!")
+    
+    # Question 3: What changed?
+    print("\nQuestion 3: What field was modified in the phishing page?")
+    print("Options: FROM, TO, AMOUNT, GAS FEE, TOTAL")
+    answer3 = input("Enter the field name: ").strip().upper()
+    
+    if answer3 != "TO":
+        print("\n✗ Incorrect. Look at which div class='label' has different content.")
+        return False
+    
+    print("✓ Correct!")
+    
     return True
 
-def main():
-    setup_files()
-    if not check_files_exist():
-        sys.exit(1)
+def award_flag():
+    """Award the flag after successful verification."""
+    try:
+        with open("/flag", 'r') as f:
+            flag = f.read().strip()
+    except FileNotFoundError:
+        flag = "pwn.college{demo_phishing_flag}"
     
-    # Files exist, just provide instructions
-    print("✓ Files already exist")
-    print("\nUse diff to compare the files and find the malicious wallet address:")
-    print(f"  diff {LEGIT_FILE} {PHISHING_FILE}")
+    print("\n" + "="*60)
+    print("SUCCESS! You've successfully analyzed the phishing attack!")
+    print("="*60)
+    print("\nYou correctly identified:")
+    print("  ✓ The legitimate destination address")
+    print("  ✓ The malicious phishing address")
+    print("  ✓ Which field was modified")
+    print("\n" + "="*60)
+    print("Here is your flag:")
+    print("="*60)
+    print(flag)
+    print("\n" + "="*60)
+    print("KEY LEARNINGS")
+    print("="*60)
+    print("\n• diff compares files line by line")
+    print("• '<' shows content from the first file (legitimate)")
+    print("• '>' shows content from the second file (phishing)")
+    print("• grep filters output to find specific patterns")
+    print("• Phishing attacks make subtle changes to steal funds")
+    print("\nAlways verify wallet addresses before confirming transactions!")
+
+def main():
+    # Check if files exist
+    if not os.path.exists(LEGIT_FILE) or not os.path.exists(PHISHING_FILE):
+        setup_files()
+        return
+    
+    # Files exist, run verification
+    print("\n" + "="*60)
+    print("Ready to verify your phishing analysis!")
+    print("="*60)
+    print("\nMake sure you've explored the files using:")
+    print("  • diff (basic comparison)")
+    print("  • diff | grep '>' (phishing changes)")
+    print("  • diff | grep '<' (legitimate content)")
+    print("  • diff | grep '0x' (wallet addresses)")
+    
+    proceed = input("\nHave you completed the analysis? (yes/no): ").strip().lower()
+    
+    if proceed not in ['yes', 'y']:
+        print("\nCome back after you've explored with diff!")
+        sys.exit(0)
+    
+    # Ask verification questions
+    if ask_questions():
+        award_flag()
+    else:
+        print("\n" + "="*60)
+        print("Keep practicing with diff! Try the commands again.")
+        print("="*60)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
