@@ -3,8 +3,8 @@
 import os
 import sys
 
-LEGIT_FILE = os.path.expanduser("~/legitimate_metamask.html")
-PHISHING_FILE = os.path.expanduser("~/phishing_metamask.html")
+LEGIT_FILE = "/home/hacker/legitimate_metamask.html"
+PHISHING_FILE = "/home/hacker/phishing_metamask.html"
 
 def setup_files():
     """Create HTML files on first run."""
