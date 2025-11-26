@@ -2,37 +2,81 @@
 
 import os
 import sys
+import random
+import string
 
 WALLET_PRIVATE_KEY_VAR = "WALLET_PRIVATE_KEY"
 BASHRC_PATH = os.path.expanduser("~/.bashrc")
+ENV_VARS_FILE = os.path.expanduser("~/.hidden_env_vars")
+
+def generate_random_string(length=20):
+    """Generate a random string for decoy values."""
+    chars = string.ascii_letters + string.digits
+    return ''.join(random.choices(chars, k=length))
 
 def setup_environment():
-    """Set up environment on first run by adding to .bashrc."""
-    # Check if already in .bashrc
-    is_setup = False
+    """Set up environment with noise to force grep usage."""
+    
+    # Check if already setup
+    files_exist = os.path.exists(ENV_VARS_FILE)
+    bashrc_linked = False
     if os.path.exists(BASHRC_PATH):
         with open(BASHRC_PATH, 'r') as f:
-            if "export " + WALLET_PRIVATE_KEY_VAR in f.read():
-                is_setup = True
+            if f"source {ENV_VARS_FILE}" in f.read():
+                bashrc_linked = True
 
-    if not is_setup:
-        try:
-            with open("/flag", 'r') as f:
-                flag = f.read().strip()
-        except FileNotFoundError:
-            flag = "pwn.college{demo_flag_hot_wallet}"
+    if files_exist and bashrc_linked:
+        return
 
-        key_value = f"0x1234567890abcdef_FLAG:{flag}"
+    # Get flag
+    try:
+        with open("/flag", 'r') as f:
+            flag = f.read().strip()
+    except FileNotFoundError:
+        flag = "pwn.college{demo_flag_hot_wallet}"
+
+    real_key_value = f"0x1234567890abcdef_FLAG:{flag}"
+    
+    # Generate 500 decoy variables
+    print("Generating environment noise...")
+    decoys = []
+    
+    # Add some realistic-looking but fake variables
+    prefixes = ["CONFIG", "APP", "DB", "AWS", "NODE", "REACT", "VUE", "PYTHON", "JAVA", "GO"]
+    suffixes = ["KEY", "SECRET", "TOKEN", "ID", "URL", "PATH", "VERSION", "MODE", "DEBUG"]
+    
+    for i in range(500):
+        if random.random() < 0.3:
+            # Structured fake variable
+            key = f"{random.choice(prefixes)}_{random.choice(suffixes)}_{generate_random_string(4).upper()}"
+        else:
+            # Random junk variable
+            key = f"VAR_{generate_random_string(8).upper()}"
+            
+        val = generate_random_string(random.randint(20, 60))
+        decoys.append(f"export {key}='{val}'")
         
+    # Insert real key at random position
+    insert_pos = random.randint(0, len(decoys))
+    decoys.insert(insert_pos, f"export {WALLET_PRIVATE_KEY_VAR}='{real_key_value}'")
+    
+    # Write to hidden file
+    with open(ENV_VARS_FILE, 'w') as f:
+        f.write("# System Environment Variables (Do not edit)\n")
+        f.write("\n".join(decoys))
+        f.write("\n")
+        
+    # Source in bashrc if not already there
+    if not bashrc_linked:
         with open(BASHRC_PATH, 'a') as f:
-            f.write(f"\n# Challenge 2 Setup\nexport {WALLET_PRIVATE_KEY_VAR}='{key_value}'\n")
+            f.write(f"\n# Challenge 2 Setup\nsource {ENV_VARS_FILE}\n")
         
-        print("Environment initialized.")
-        print(f"Added {WALLET_PRIVATE_KEY_VAR} to {BASHRC_PATH}")
-        print("Please run the following command to load the changes:")
-        print("\n    source ~/.bashrc\n")
-        print("Then run this script again to verify.")
-        sys.exit(0)
+    print("Environment initialized with noise.")
+    print(f"Generated {len(decoys)} environment variables.")
+    print("Please run the following command to load the changes:")
+    print("\n    source ~/.bashrc\n")
+    print("Then run this script again to verify.")
+    sys.exit(0)
 
 def check_solution():
     """Verify student found the wallet private key (by checking if it's in env)."""
