@@ -147,6 +147,34 @@ def setup_files():
 
 def ask_questions():
     """Ask student questions to verify they used diff properly."""
+    
+    # Read the actual addresses from the files
+    legit_address = None
+    phishing_address = None
+    
+    try:
+        with open(LEGIT_FILE, 'r') as f:
+            content = f.read()
+            # Extract the TO address from legitimate file
+            import re
+            match = re.search(r'<div class="label">TO</div>\s*<div class="value">([^<]+)</div>', content)
+            if match:
+                legit_address = match.group(1).strip()
+        
+        with open(PHISHING_FILE, 'r') as f:
+            content = f.read()
+            # Extract the TO address from phishing file
+            match = re.search(r'<div class="label">TO</div>\s*<div class="value">([^<]+)</div>', content)
+            if match:
+                phishing_address = match.group(1).strip()
+    except Exception as e:
+        print(f"Error reading files: {e}")
+        return False
+    
+    if not legit_address or not phishing_address:
+        print("Error: Could not extract addresses from files")
+        return False
+    
     print("\n" + "="*60)
     print("PHISHING ANALYSIS VERIFICATION")
     print("="*60)
@@ -156,8 +184,9 @@ def ask_questions():
     print("(Hint: Use 'diff ... | grep \"<\"' to see legitimate content)")
     answer1 = input("Enter the address: ").strip()
     
-    if "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb" not in answer1:
-        print("\n✗ Incorrect. Try using: diff ... | grep '<' | grep '0x'")
+    if legit_address not in answer1:
+        print(f"\n✗ Incorrect. The legitimate address is: {legit_address}")
+        print("Try using: diff ... | grep '<' | grep '0x'")
         return False
     
     print("✓ Correct!")
@@ -167,8 +196,9 @@ def ask_questions():
     print("(Hint: Use 'diff ... | grep \">\"' to see phishing content)")
     answer2 = input("Enter the address: ").strip()
     
-    if "0xDEADBEEFATTACKER" not in answer2:
-        print("\n✗ Incorrect. Try using: diff ... | grep '>' | grep '0x'")
+    if phishing_address not in answer2:
+        print(f"\n✗ Incorrect. The phishing address is: {phishing_address}")
+        print("Try using: diff ... | grep '>' | grep '0x'")
         return False
     
     print("✓ Correct!")
