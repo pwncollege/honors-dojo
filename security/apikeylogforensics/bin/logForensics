@@ -4,7 +4,7 @@ import os
 import sys
 import random
 
-LOG_FILE = os.path.expanduser("~/web3_server.log")
+LOG_FILE = "/home/hacker/web3_server.log"
 
 def generate_log_file():
     """Generate large log file with hidden API key."""
