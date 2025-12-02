@@ -21,7 +21,7 @@ def setup_files():
 
         # Create valid signature (66 characters)
         with open(VALID_SIG_FILE, 'w') as f:
-            f.write("0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef12345678")
+            f.write("0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890")
 
         # Create invalid signature
         with open(INVALID_SIG_FILE, 'w') as f:
