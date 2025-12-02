@@ -5,13 +5,15 @@ import sys
 import random
 import string
 
-# Get the actual user's home directory (not root's, even when running suid)
+# Get the actual user's home directory and use /tmp for challenge files
 USER_HOME = os.environ.get('HOME', os.path.expanduser("~"))
+# Use /tmp for writable files when running as suid, but reference them from home in .bashrc
+CHALLENGE_DIR = "/tmp/challenge2_hot_wallet"
 
 WALLET_PRIVATE_KEY_VAR = "WALLET_PRIVATE_KEY"
 BASHRC_PATH = os.path.join(USER_HOME, ".bashrc")
-ENV_VARS_FILE = os.path.join(USER_HOME, ".hidden_env_vars")
-ANSWER_FILE = os.path.join(USER_HOME, ".wallet_key_answer")
+ENV_VARS_FILE = os.path.join(CHALLENGE_DIR, "env_vars")
+ANSWER_FILE = os.path.join(CHALLENGE_DIR, "answer")
 
 def generate_random_string(length=20):
     """Generate a random string for decoy values."""
@@ -20,7 +22,12 @@ def generate_random_string(length=20):
 
 def setup_environment():
     """Set up environment with noise to force grep usage."""
-    
+
+    # Create challenge directory if it doesn't exist
+    os.makedirs(CHALLENGE_DIR, exist_ok=True)
+    # Make it world-readable so user can source the file
+    os.chmod(CHALLENGE_DIR, 0o755)
+
     # Check if already setup
     files_exist = os.path.exists(ENV_VARS_FILE)
     bashrc_linked = False
@@ -63,12 +70,14 @@ def setup_environment():
     insert_pos = random.randint(0, len(decoys))
     decoys.insert(insert_pos, f"export {WALLET_PRIVATE_KEY_VAR}='{real_key_value}'")
     
-    # Write to hidden file
+    # Write to env vars file
     with open(ENV_VARS_FILE, 'w') as f:
         f.write("# System Environment Variables (Do not edit)\n")
         f.write("\n".join(decoys))
         f.write("\n")
-        
+    # Make env file world-readable so user can source it
+    os.chmod(ENV_VARS_FILE, 0o644)
+
     # Source in bashrc if not already there
     if not bashrc_linked:
         with open(BASHRC_PATH, 'a') as f:
