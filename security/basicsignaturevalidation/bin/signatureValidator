@@ -3,9 +3,9 @@
 import os
 import sys
 
-TRANSACTION_FILE = "home/hacker/transaction.txt"
-VALID_SIG_FILE = "home/hacker/valid_signature.txt"
-INVALID_SIG_FILE = "home/hacker/invalid_signature.txt"
+TRANSACTION_FILE = "/home/hacker/transaction.txt"
+VALID_SIG_FILE = "/home/hacker/valid_signature.txt"
+INVALID_SIG_FILE = "/home/hacker/invalid_signature.txt"
 
 def setup_files():
     """Create signature files on first run."""
