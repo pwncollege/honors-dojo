@@ -8,6 +8,7 @@ import string
 WALLET_PRIVATE_KEY_VAR = "WALLET_PRIVATE_KEY"
 BASHRC_PATH = os.path.expanduser("~/.bashrc")
 ENV_VARS_FILE = os.path.expanduser("~/.hidden_env_vars")
+ANSWER_FILE = os.path.expanduser("~/.wallet_key_answer")
 
 def generate_random_string(length=20):
     """Generate a random string for decoy values."""
@@ -28,14 +29,13 @@ def setup_environment():
     if files_exist and bashrc_linked:
         return
 
-    # Get flag
-    try:
-        with open("/flag", 'r') as f:
-            flag = f.read().strip()
-    except FileNotFoundError:
-        flag = "pwn.college{demo_flag_hot_wallet}"
+    # Generate random private key WITHOUT flag
+    real_key_value = '0x' + ''.join(random.choices(string.hexdigits.lower(), k=64))
 
-    real_key_value = f"0x1234567890abcdef_FLAG:{flag}"
+    # Store the correct answer for later verification
+    with open(ANSWER_FILE, 'w') as f:
+        f.write(real_key_value)
+    os.chmod(ANSWER_FILE, 0o600)  # Owner read/write only
     
     # Generate 500 decoy variables
     print("Generating environment noise...")
@@ -70,38 +70,87 @@ def setup_environment():
     if not bashrc_linked:
         with open(BASHRC_PATH, 'a') as f:
             f.write(f"\n# Challenge 2 Setup\nsource {ENV_VARS_FILE}\n")
-        
+
     print("Environment initialized with noise.")
     print(f"Generated {len(decoys)} environment variables.")
-    print("Please run the following command to load the changes:")
-    print("\n    source ~/.bashrc\n")
-    print("Then run this script again to verify.")
+    print("\nTo complete this challenge:")
+    print("  1. Run: source ~/.bashrc")
+    print("  2. Find the WALLET_PRIVATE_KEY using grep/printenv/echo")
+    print("  3. Submit it: walletExposure <private_key>\n")
     sys.exit(0)
 
-def check_solution():
-    """Verify student found the wallet private key (by checking if it's in env)."""
-    if WALLET_PRIVATE_KEY_VAR not in os.environ:
-        print(f"Error: {WALLET_PRIVATE_KEY_VAR} environment variable not found in current session.")
-        print("\nPossible reasons:")
-        print("1. You haven't run 'source ~/.bashrc' yet.")
-        print("2. You haven't run this script once to set up the environment.")
-        print("\nTry running: source ~/.bashrc")
+def verify_submission(submitted_key):
+    """Verify the student's submitted private key."""
+    # Check if challenge is set up
+    if not os.path.exists(ANSWER_FILE):
+        print("❌ Error: Challenge not set up yet.")
+        print("\nPlease run 'walletExposure' first to initialize the environment.")
         return False
-    return True
+
+    # Read stored answer
+    with open(ANSWER_FILE, 'r') as f:
+        correct_key = f.read().strip()
+
+    # Normalize inputs (strip whitespace, case-insensitive comparison)
+    submitted = submitted_key.strip().lower()
+    correct = correct_key.strip().lower()
+
+    # Compare
+    if submitted == correct:
+        return True
+
+    # Provide helpful feedback for common mistakes
+    if submitted == correct.replace('0x', ''):
+        print("❌ Almost! Don't forget the '0x' prefix.")
+        return False
+    if '0x' + submitted == correct:
+        print("❌ Close! Remove the extra '0x' - the key should start with 0x.")
+        return False
+
+    return False
 
 def award_flag():
-    """Award the flag."""
-    print(f"✓ Found exposed {WALLET_PRIVATE_KEY_VAR} environment variable")
-    print("\n" + "="*50)
-    print("SUCCESS! The flag is in the private key value:")
-    print("="*50)
-    print(f"{os.environ[WALLET_PRIVATE_KEY_VAR]}")
+    """Award the flag to the student."""
+    # Read the actual flag
+    try:
+        with open("/flag", 'r') as f:
+            flag = f.read().strip()
+    except FileNotFoundError:
+        flag = "pwn.college{demo_flag_hot_wallet}"
+
+    print("✓ Correct! You successfully found the exposed WALLET_PRIVATE_KEY\n")
+    print("=" * 60)
+    print("SUCCESS! Here is your flag:")
+    print("=" * 60)
+    print(flag)
+    print()
+    print("🔒 Security Lesson:")
+    print("   Never store private keys in environment variables!")
+    print("   - Environment variables are inherited by child processes")
+    print("   - They can be logged accidentally")
+    print("   - They're visible in process listings")
+    print("   - Use hardware wallets or secret management systems instead")
+    print("=" * 60)
 
 def main():
+    # Check if student provided a private key argument
+    if len(sys.argv) > 1:
+        # Verification mode: student submitting answer
+        submitted_key = sys.argv[1]
+
+        if verify_submission(submitted_key):
+            award_flag()
+            sys.exit(0)
+        else:
+            print("❌ Incorrect private key. Try again.")
+            print("\nHints:")
+            print("  - Make sure you copied the entire key including '0x' prefix")
+            print("  - The key should be 66 characters (0x + 64 hex digits)")
+            print("  - Use: env | grep WALLET_PRIVATE_KEY")
+            sys.exit(1)
+
+    # Setup mode: no arguments provided
     setup_environment()
-    if not check_solution():
-        sys.exit(1)
-    award_flag()
 
 if __name__ == "__main__":
     main()
