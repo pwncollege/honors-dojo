@@ -5,10 +5,13 @@ import sys
 import random
 import string
 
+# Get the actual user's home directory (not root's, even when running suid)
+USER_HOME = os.environ.get('HOME', os.path.expanduser("~"))
+
 WALLET_PRIVATE_KEY_VAR = "WALLET_PRIVATE_KEY"
-BASHRC_PATH = os.path.expanduser("~/.bashrc")
-ENV_VARS_FILE = os.path.expanduser("~/.hidden_env_vars")
-ANSWER_FILE = os.path.expanduser("~/.wallet_key_answer")
+BASHRC_PATH = os.path.join(USER_HOME, ".bashrc")
+ENV_VARS_FILE = os.path.join(USER_HOME, ".hidden_env_vars")
+ANSWER_FILE = os.path.join(USER_HOME, ".wallet_key_answer")
 
 def generate_random_string(length=20):
     """Generate a random string for decoy values."""
