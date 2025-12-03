@@ -41,9 +41,9 @@ resources:
    - name: "[LECTURE PLACEHOLDER] CD with GitHub Actions"
      type: lecture
      video: dQw4w9WgXcQ
-   - name: "[CHALLENGE PLACEHOLDER] Artifact Promotion"
-     type: lecture
-     video: dQw4w9WgXcQ
+   - id: artifact-promo
+     name: Artifact Promotion
+     type: challenge
 #  - id: join
 #    name: Join an IRC Server
 #  - id: join2
