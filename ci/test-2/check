@@ -103,7 +103,7 @@ def precheck_script() -> bool:
         )
 
         # Run sha2 checker and capture stdout/stderr
-        proc = subprocess.Popen(
+        proc2 = subprocess.Popen(
             ["bash", "/challenge/repository/tst/check-sha2.sh"],
             text=True,
             preexec_fn=demote_workflow(user_uid, user_gid),
@@ -119,12 +119,20 @@ def precheck_script() -> bool:
             # print(line, end="")   # live print
             output_lines.append(line)
         proc.wait()
+
+        output_lines2 = []
+        for line in proc2.stdout:
+            # print(line, end="")   # live print
+            output_lines2.append(line)
+        proc2.wait()
+
     except Exception as e:
         chal_fail(f"Error with challenge setup (REPORT THIS!): {e}")
         return False
 
     # Join lines into a single string for regex matching
     full_output = "".join(output_lines)
+    full_output2 = "".join(output_lines2)
 
     # Parse the SHA256 hash
     sha256_pattern = re.compile(r'\b([0-9a-f]{64})\b\s+build/program')
@@ -133,7 +141,7 @@ def precheck_script() -> bool:
         sha256_hash = match.group(1)
 
     sha512_pattern = re.compile(r'\b([0-9a-f]{128})\b\s+build/program')
-    match = sha512_pattern.search(full_output)
+    match = sha512_pattern.search(full_output2)
     if match:
         sha512_hash = match.group(1)
 
