@@ -32,6 +32,14 @@ def is_matrix_present():
         return False
 
     # Parse for the required structure
+    jobs = data.get("jobs")
+    if not isinstance(jobs, dict):
+        return False
+    
+    bb = data.get("build-binary")
+    if not isinstance(bb, dict):
+        return False
+
     strategy = data.get("strategy")
     if not isinstance(strategy, dict):
         return False
