@@ -55,7 +55,7 @@ def precheck_script() -> bool:
 
         # Run sha checker and capture stdout/stderr
         proc = subprocess.Popen(
-            ["bash", "/challenge/repository/check-sha.sh"],
+            ["bash", "/challenge/repository/tst/check-sha.sh"],
             text=True,
             preexec_fn=demote_workflow(user_uid, user_gid),
             env=env,
