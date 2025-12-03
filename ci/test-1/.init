@@ -15,6 +15,8 @@ mkdir /challenge/repository/build
 chmod -R 755 "/challenge/repository" # RWX-R-X-R-X
 chown -R devops_runner "/challenge/repository"
 
+chmod -R 751 "/challenge/repository/tst" # RWX-R-X-R--
+
 # Allow the user to modify just the workflows folder
 chmod -R 777 "/challenge/repository/.github/workflows" # RWX-RWX-RWX
 chown -R hacker "/challenge/repository/.github/workflows"
