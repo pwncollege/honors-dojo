@@ -36,11 +36,11 @@ def is_matrix_present():
     if not isinstance(jobs, dict):
         return False
     
-    bb = data.get("build-binary")
+    bb = jobs.get("build-binary")
     if not isinstance(bb, dict):
         return False
 
-    strategy = data.get("strategy")
+    strategy = bb.get("strategy")
     if not isinstance(strategy, dict):
         return False
 
