@@ -2,101 +2,14 @@
 
 import os
 import sys
-import random
-import string
 
-# Get the actual user's home directory and use /tmp for challenge files
-USER_HOME = os.environ.get('HOME', os.path.expanduser("~"))
-# Use /tmp for writable files when running as suid, but reference them from home in .bashrc
-CHALLENGE_DIR = "/tmp/challenge2_hot_wallet"
-
-WALLET_PRIVATE_KEY_VAR = "WALLET_PRIVATE_KEY"
-BASHRC_PATH = os.path.join(USER_HOME, ".bashrc")
-ENV_VARS_FILE = os.path.join(CHALLENGE_DIR, "env_vars")
-ANSWER_FILE = os.path.join(CHALLENGE_DIR, "answer")
-
-def generate_random_string(length=20):
-    """Generate a random string for decoy values."""
-    chars = string.ascii_letters + string.digits
-    return ''.join(random.choices(chars, k=length))
-
-def setup_environment():
-    """Set up environment with noise to force grep usage."""
-
-    # Create challenge directory if it doesn't exist
-    os.makedirs(CHALLENGE_DIR, exist_ok=True)
-    # Make it world-readable so user can source the file
-    os.chmod(CHALLENGE_DIR, 0o755)
-
-    # Check if already setup
-    files_exist = os.path.exists(ENV_VARS_FILE)
-    bashrc_linked = False
-    if os.path.exists(BASHRC_PATH):
-        with open(BASHRC_PATH, 'r') as f:
-            if f"source {ENV_VARS_FILE}" in f.read():
-                bashrc_linked = True
-
-    if files_exist and bashrc_linked:
-        return
-
-    # Generate random private key WITHOUT flag
-    real_key_value = '0x' + ''.join(random.choices(string.hexdigits.lower(), k=64))
-
-    # Store the correct answer for later verification
-    with open(ANSWER_FILE, 'w') as f:
-        f.write(real_key_value)
-    os.chmod(ANSWER_FILE, 0o600)  # Owner read/write only
-    
-    # Generate 500 decoy variables
-    print("Generating environment noise...")
-    decoys = []
-    
-    # Add some realistic-looking but fake variables
-    prefixes = ["CONFIG", "APP", "DB", "AWS", "NODE", "REACT", "VUE", "PYTHON", "JAVA", "GO"]
-    suffixes = ["KEY", "SECRET", "TOKEN", "ID", "URL", "PATH", "VERSION", "MODE", "DEBUG"]
-    
-    for i in range(500):
-        if random.random() < 0.3:
-            # Structured fake variable
-            key = f"{random.choice(prefixes)}_{random.choice(suffixes)}_{generate_random_string(4).upper()}"
-        else:
-            # Random junk variable
-            key = f"VAR_{generate_random_string(8).upper()}"
-            
-        val = generate_random_string(random.randint(20, 60))
-        decoys.append(f"export {key}='{val}'")
-        
-    # Insert real key at random position
-    insert_pos = random.randint(0, len(decoys))
-    decoys.insert(insert_pos, f"export {WALLET_PRIVATE_KEY_VAR}='{real_key_value}'")
-    
-    # Write to env vars file
-    with open(ENV_VARS_FILE, 'w') as f:
-        f.write("# System Environment Variables (Do not edit)\n")
-        f.write("\n".join(decoys))
-        f.write("\n")
-    # Make env file world-readable so user can source it
-    os.chmod(ENV_VARS_FILE, 0o644)
-
-    # Source in bashrc if not already there
-    if not bashrc_linked:
-        with open(BASHRC_PATH, 'a') as f:
-            f.write(f"\n# Challenge 2 Setup\nsource {ENV_VARS_FILE}\n")
-
-    print("Environment initialized with noise.")
-    print(f"Generated {len(decoys)} environment variables.")
-    print("\nTo complete this challenge:")
-    print("  1. Run: source ~/.bashrc")
-    print("  2. Find the WALLET_PRIVATE_KEY using grep/printenv/echo")
-    print("  3. Submit it: walletExposure <private_key>\n")
-    sys.exit(0)
+ANSWER_FILE = "/home/hacker/.wallet_key_answer"
 
 def verify_submission(submitted_key):
     """Verify the student's submitted private key."""
-    # Check if challenge is set up
     if not os.path.exists(ANSWER_FILE):
         print("❌ Error: Challenge not set up yet.")
-        print("\nPlease run 'walletExposure' first to initialize the environment.")
+        print("\nThis shouldn't happen. Try restarting the challenge.")
         return False
 
     # Read stored answer
@@ -123,7 +36,6 @@ def verify_submission(submitted_key):
 
 def award_flag():
     """Award the flag to the student."""
-    # Read the actual flag
     try:
         with open("/flag", 'r') as f:
             flag = f.read().strip()
@@ -145,24 +57,27 @@ def award_flag():
     print("=" * 60)
 
 def main():
-    # Check if student provided a private key argument
-    if len(sys.argv) > 1:
-        # Verification mode: student submitting answer
-        submitted_key = sys.argv[1]
+    if len(sys.argv) < 2:
+        print("Usage: walletExposure <private_key>")
+        print()
+        print("To solve this challenge:")
+        print("  1. Run: source ~/.bashrc")
+        print("  2. Find the WALLET_PRIVATE_KEY: env | grep WALLET_PRIVATE_KEY")
+        print("  3. Submit it: walletExposure <private_key>")
+        sys.exit(1)
 
-        if verify_submission(submitted_key):
-            award_flag()
-            sys.exit(0)
-        else:
-            print("❌ Incorrect private key. Try again.")
-            print("\nHints:")
-            print("  - Make sure you copied the entire key including '0x' prefix")
-            print("  - The key should be 66 characters (0x + 64 hex digits)")
-            print("  - Use: env | grep WALLET_PRIVATE_KEY")
-            sys.exit(1)
+    submitted_key = sys.argv[1]
 
-    # Setup mode: no arguments provided
-    setup_environment()
+    if verify_submission(submitted_key):
+        award_flag()
+        sys.exit(0)
+    else:
+        print("❌ Incorrect private key. Try again.")
+        print("\nHints:")
+        print("  - Make sure you copied the entire key including '0x' prefix")
+        print("  - The key should be 66 characters (0x + 64 hex digits)")
+        print("  - Use: env | grep WALLET_PRIVATE_KEY")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Challenge 2: The Hot Wallet Exposure - Setup Script
+# This runs before the challenge starts to set up the environment
+
+# Generate random 64-character hex private key
+PRIVATE_KEY="0x$(openssl rand -hex 32)"
+
+# Store answer for validation
+echo "$PRIVATE_KEY" > /home/hacker/.wallet_key_answer
+chmod 600 /home/hacker/.wallet_key_answer
+chown hacker:hacker /home/hacker/.wallet_key_answer
+
+# Generate 500 decoy environment variables
+{
+    echo "# System Environment Variables (Do not edit)"
+
+    # Generate realistic-looking decoy variables
+    for i in {1..500}; do
+        PREFIX=$(shuf -n1 -e "CONFIG" "APP" "DB" "AWS" "NODE" "REACT" "VUE" "PYTHON" "JAVA" "GO")
+        SUFFIX=$(shuf -n1 -e "KEY" "SECRET" "TOKEN" "ID" "URL" "PATH" "VERSION" "MODE" "DEBUG")
+        RANDOM_STR=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 40)
+        echo "export ${PREFIX}_${SUFFIX}_$(tr -dc 'A-Z0-9' < /dev/urandom | head -c 4)='${RANDOM_STR}'"
+    done
+
+    # Insert real WALLET_PRIVATE_KEY at random position (already generated above)
+    echo "export WALLET_PRIVATE_KEY='${PRIVATE_KEY}'"
+
+} | shuf > /home/hacker/.hidden_env_vars  # Shuffle to randomize position
+
+# Set permissions
+chmod 644 /home/hacker/.hidden_env_vars
+chown hacker:hacker /home/hacker/.hidden_env_vars
+
+# Create .bashrc that sources the environment variables
+cat > /home/hacker/.bashrc << 'EOF'
+# Challenge 2 Setup - Source environment variables
+source /home/hacker/.hidden_env_vars
+EOF
+
+chmod 644 /home/hacker/.bashrc
+chown hacker:hacker /home/hacker/.bashrc
