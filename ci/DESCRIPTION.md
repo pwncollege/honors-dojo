@@ -4,4 +4,4 @@ An introduction to the **CI** part of **CI**/CD.
 
 Credits:
 - This project makes heavy use of Nektos's [act](https://github.com/nektos/act) to run challenges in the dojo.
-- This module was created by [Eli Sells](https://github.com/ETSells).
+- This module was created by [Eli Sells](https://github.com/ETSells) as an honors project for CSE 365.

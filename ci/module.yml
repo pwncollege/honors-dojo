@@ -29,9 +29,9 @@ resources:
    - name: "[LECTURE PLACEHOLDER] Running Automated Tests"
      type: lecture
      video: dQw4w9WgXcQ
-   - name: "[CHALLENGE PLACEHOLDER] Run a Unit Test"
-     type: lecture
-     video: dQw4w9WgXcQ
+   - id: test-1
+     name: Run a Unit Test
+     type: challenge
    - name: "[CHALLENGE PLACEHOLDER] Run a Test Suite"
      type: lecture
      video: dQw4w9WgXcQ
