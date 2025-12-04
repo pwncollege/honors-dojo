@@ -27,9 +27,9 @@ git config --global user.email "not@realemail.com"
 git config --global user.name "Test User"
 
 # Add artifact server
-mkdir /challenge/.artifact-server
-chmod -R 755 "/challenge/.artifact-server"
-chown -R devops_runner "/challenge/.artifact-server"
+mkdir /challenge/artifacts
+chmod -R 755 "/challenge/artifacts"
+chown -R devops_runner "/challenge/artifacts"
 
 # Commit the source files
 git add src/*
