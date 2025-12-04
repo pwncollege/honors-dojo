@@ -1,0 +1,83 @@
+#!/usr/bin/exec-suid -- /usr/local/bin/python -I
+
+import os
+import sys
+
+ANSWER_FILE = "/home/hacker/.wallet_key_answer"
+
+def verify_submission(submitted_key):
+    """Verify the student's submitted private key."""
+    if not os.path.exists(ANSWER_FILE):
+        print("❌ Error: Challenge not set up yet.")
+        print("\nThis shouldn't happen. Try restarting the challenge.")
+        return False
+
+    # Read stored answer
+    with open(ANSWER_FILE, 'r') as f:
+        correct_key = f.read().strip()
+
+    # Normalize inputs (strip whitespace, case-insensitive comparison)
+    submitted = submitted_key.strip().lower()
+    correct = correct_key.strip().lower()
+
+    # Compare
+    if submitted == correct:
+        return True
+
+    # Provide helpful feedback for common mistakes
+    if submitted == correct.replace('0x', ''):
+        print("❌ Almost! Don't forget the '0x' prefix.")
+        return False
+    if '0x' + submitted == correct:
+        print("❌ Close! Remove the extra '0x' - the key should start with 0x.")
+        return False
+
+    return False
+
+def award_flag():
+    """Award the flag to the student."""
+    try:
+        with open("/flag", 'r') as f:
+            flag = f.read().strip()
+    except FileNotFoundError:
+        flag = "pwn.college{demo_flag_hot_wallet}"
+
+    print("✓ Correct! You successfully found the exposed WALLET_PRIVATE_KEY\n")
+    print("=" * 60)
+    print("SUCCESS! Here is your flag:")
+    print("=" * 60)
+    print(flag)
+    print()
+    print("🔒 Security Lesson:")
+    print("   Never store private keys in environment variables!")
+    print("   - Environment variables are inherited by child processes")
+    print("   - They can be logged accidentally")
+    print("   - They're visible in process listings")
+    print("   - Use hardware wallets or secret management systems instead")
+    print("=" * 60)
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: walletExposure <private_key>")
+        print()
+        print("To solve this challenge:")
+        print("  1. Run: source ~/.bashrc")
+        print("  2. Find the WALLET_PRIVATE_KEY: env | grep WALLET_PRIVATE_KEY")
+        print("  3. Submit it: walletExposure <private_key>")
+        sys.exit(1)
+
+    submitted_key = sys.argv[1]
+
+    if verify_submission(submitted_key):
+        award_flag()
+        sys.exit(0)
+    else:
+        print("❌ Incorrect private key. Try again.")
+        print("\nHints:")
+        print("  - Make sure you copied the entire key including '0x' prefix")
+        print("  - The key should be 66 characters (0x + 64 hex digits)")
+        print("  - Use: env | grep WALLET_PRIVATE_KEY")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

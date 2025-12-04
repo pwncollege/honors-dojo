@@ -1,0 +1,116 @@
+#!/usr/bin/exec-suid -- /usr/local/bin/python -I
+
+import os
+import sys
+import subprocess
+
+TRANSACTION_FILE = "/home/hacker/transaction.txt"
+VALID_SIG_FILE = "/home/hacker/valid_signature.txt"
+INVALID_SIG_FILE = "/home/hacker/invalid_signature.txt"
+USER_SCRIPT = "./validate.sh"
+
+def setup_files():
+    """Create signature files if they don't exist."""
+    # Always recreate to ensure they are correct (fixes previous 64-char bug)
+    
+    # Create transaction file
+    with open(TRANSACTION_FILE, 'w') as f:
+        f.write('''{
+  "from": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  "to": "0x1234567890123456789012345678901234567890",
+  "value": "1500000000000000000",
+  "nonce": 42
+}''')
+
+    # Create valid signature (66 characters)
+    with open(VALID_SIG_FILE, 'w') as f:
+        f.write("0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890")
+
+    # Create invalid signature
+    with open(INVALID_SIG_FILE, 'w') as f:
+        f.write("0xINVALID")
+
+    # Only print if we think this is the first run (e.g. script doesn't exist)
+    if not os.path.exists(USER_SCRIPT):
+        print("Signature files created.")
+
+def check_user_script():
+    """Check if user's script works correctly."""
+    if not os.path.exists(USER_SCRIPT):
+        print(f"\nError: {USER_SCRIPT} not found.")
+        return False
+
+    if not os.access(USER_SCRIPT, os.X_OK):
+        print(f"\nError: {USER_SCRIPT} is not executable.")
+        print(f"Run: chmod +x {USER_SCRIPT}")
+        return False
+
+    print(f"\nTesting {USER_SCRIPT}...")
+
+    # Test 1: Valid signature
+    try:
+        result = subprocess.run([USER_SCRIPT, VALID_SIG_FILE], capture_output=True, text=True, timeout=2)
+        # Check for "Valid" in output
+        if "Valid" not in result.stdout:
+             print("✗ Test 1 Failed: Script did not output 'Valid' for valid signature.")
+             print(f"  Output: {result.stdout}")
+             return False
+        print("✓ Test 1 Passed: Valid signature accepted.")
+    except Exception as e:
+        print(f"✗ Test 1 Failed: Error running script: {e}")
+        return False
+
+    # Test 2: Invalid signature
+    try:
+        result = subprocess.run([USER_SCRIPT, INVALID_SIG_FILE], capture_output=True, text=True, timeout=2)
+        # Check for "Invalid" in output
+        if "Invalid" not in result.stdout:
+             print("✗ Test 2 Failed: Script did not output 'Invalid' for invalid signature.")
+             print(f"  Output: {result.stdout}")
+             return False
+        print("✓ Test 2 Passed: Invalid signature rejected.")
+    except Exception as e:
+        print(f"✗ Test 2 Failed: Error running script: {e}")
+        return False
+
+    return True
+
+def print_instructions():
+    print("\n" + "="*50)
+    print("Challenge: Basic Signature Validation")
+    print("="*50)
+    print("1. Write a bash script 'validate.sh' that:")
+    print("   - Takes a signature file as an argument ($1)")
+    print("   - Checks if the content length is exactly 66 characters")
+    print("   - Prints 'Valid signature!' if correct")
+    print("   - Prints 'Invalid signature!' if incorrect")
+    print("\n2. Make it executable: chmod +x validate.sh")
+    print("\n3. Run this command again to verify your solution and get the flag!")
+    print("   signatureValidator")
+
+def award_flag():
+    print("\n" + "="*50)
+    print("SUCCESS! Your validation script works correctly.")
+    print("Here is your flag:")
+    print("="*50)
+    try:
+        with open("/flag", 'r') as f:
+            print(f.read())
+    except FileNotFoundError:
+        print("pwn.college{DEMO_FLAG}")
+
+def main():
+    setup_files()
+    
+    if not os.path.exists(USER_SCRIPT):
+        print_instructions()
+        sys.exit(0)
+
+    if check_user_script():
+        award_flag()
+    else:
+        print_instructions()
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

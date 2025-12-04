@@ -5,4 +5,5 @@ award:
   emoji: 🛠
 modules:
  - id: irc
+ - id: security
  - id: ci

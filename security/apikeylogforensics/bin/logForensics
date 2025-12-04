@@ -1,0 +1,75 @@
+#!/usr/bin/exec-suid -- /usr/local/bin/python -I
+
+import os
+import sys
+import random
+
+LOG_FILE = "/home/hacker/web3_server.log"
+
+def generate_log_file():
+    """Generate large log file with hidden API key."""
+    if not os.path.exists(LOG_FILE):
+        # Get flag
+        try:
+            with open("/flag", 'r') as f:
+                flag = f.read().strip()
+        except FileNotFoundError:
+            flag = "pwn.college{demo_log_forensics}"
+
+        print(f"Generating {LOG_FILE} (this may take a moment)...")
+
+        with open(LOG_FILE, 'w') as f:
+            # Write many log entries
+            for i in range(50000):
+                level = random.choice(['INFO', 'DEBUG', 'WARN', 'ERROR'])
+                service = random.choice(['WalletService', 'AuthService', 'APIGateway'])
+                messages = [
+                    f"Transaction processed: 0x{random.randint(0, 2**64):016x}",
+                    f"Balance check for address",
+                    f"Block #{random.randint(1, 1000000)} synchronized",
+                    "Connection timeout to peer node"
+                ]
+                message = random.choice(messages)
+                f.write(f"2024-01-15 12:34:56 [{level}] {service}: {message}\n")
+
+                # Insert the breach entry in the middle
+                if i == 25000:
+                    f.write(f"2024-01-15 14:23:17 [ERROR] APIGateway: UNAUTHORIZED access attempt detected - API_KEY=sk_live_BREACH_{flag} used without proper authentication\n")
+
+        print(f"Log file generated: {LOG_FILE}")
+        print(f"Contains {50001} lines")
+        print("\nUse grep to find the UNAUTHORIZED API_KEY entry:")
+        print('  grep "ERROR" ~/web3_server.log | grep "UNAUTHORIZED" | grep "API_KEY"')
+        sys.exit(0)
+
+def check_log_exists():
+    """Verify log file exists."""
+    if not os.path.exists(LOG_FILE):
+        print(f"Error: Log file not found at {LOG_FILE}")
+        print("\nRun this command again to generate it")
+        return False
+    return True
+
+def award_flag():
+    """Award the flag."""
+    print(f"✓ Log file exists: {LOG_FILE}")
+    print("\n" + "="*50)
+    print("Use grep to find the breach:")
+    print('  grep "ERROR" ~/web3_server.log | grep "UNAUTHORIZED" | grep "API_KEY"')
+    print("="*50)
+
+    try:
+        with open("/flag", 'r') as f:
+            flag = f.read().strip()
+        print(f"\nThe API_KEY contains: {flag}")
+    except FileNotFoundError:
+        print("\nThe API_KEY contains: pwn.college{demo_log_forensics}")
+
+def main():
+    generate_log_file()
+    if not check_log_exists():
+        sys.exit(1)
+    award_flag()
+
+if __name__ == "__main__":
+    main()
