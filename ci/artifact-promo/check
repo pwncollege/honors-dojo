@@ -34,13 +34,12 @@ def postcheck_script(workflow_output: str) -> bool:
 
     try:
         proc = subprocess.Popen(
-            ["/challenge/.artifact-server/program"],
+            ["/challenge/artifacts/program"],
             cwd='/challenge/repository',
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True)
         proc.wait()
-        chal_pass("You should see your output above!")
     except Exception as e:
         chal_fail("Something went wrong while running the program: " + str(e))
         return False
@@ -67,7 +66,7 @@ def run_workflow():
         "USER": "devops_runner",
     }
 
-    command = ["act", "push", "-P", "ubuntu-latest=-self-hosted", "--artifact-server-path", "/challenge/.artifact-server"]
+    command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
 
     output_lines = []
     try:
@@ -123,7 +122,7 @@ result, workflow_output = run_workflow()
 if( result == 0 ):
     print(text_colors['green'] + "Checking some postconditions..." + text_colors['dflt'])
     if postcheck_script(workflow_output):  # verify hash
-        chal_pass()
+        chal_pass("You should see your output above!")
     else:
         chal_fail("The challenge has failed.")
 else:
