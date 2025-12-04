@@ -26,8 +26,10 @@ artifacts action. We're gonna get around it by using the following step:
 
 ```
 - name: "Upload Artifacts"
-  uses: ./.github/actions/upload-artifacts.sh [file-name]
+  uses: ./.github/actions/upload-artifacts
+  with:
+    file: [file-name]
 ```
 
-This is a pretty big stretch from what you'd do for an actual project, but work with me here, 
+This is a bit different from what you'd do for an actual project, but work with me here, 
 Github Actions wasn't built to be an offline tool.
