@@ -1,8 +1,8 @@
 id: "honors-dojo"
 name: Honors Dojo
-type: private
+type: public
 award:
-  emoji: 🛠
+  emoji: ⌨
 modules:
  - id: irc
  - id: security
