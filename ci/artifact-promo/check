@@ -33,13 +33,16 @@ def postcheck_script(workflow_output: str) -> bool:
     # Run program in artifact server
 
     try:
-        proc = subprocess.Popen(
+        with subprocess.Popen(
             ["/challenge/artifacts/program"],
             cwd='/challenge/repository',
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            text=True)
-        proc.wait()
+            text=True) as proc:
+                for line in proc.stdout:
+                    print(line)
+                proc.wait()
+        return True
     except Exception as e:
         chal_fail("Something went wrong while running the program: " + str(e))
         return False
