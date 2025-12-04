@@ -26,9 +26,9 @@ resources:
 
    - content: Automated Testing
      type: header
-   - name: "[LECTURE PLACEHOLDER] Running Automated Tests"
+   - name: "Running Automated Tests"
      type: lecture
-     video: dQw4w9WgXcQ
+     video: BSbdYaKxajI
    - id: test-1
      name: Run a Unit Test
      type: challenge
@@ -38,9 +38,9 @@ resources:
 
    - content: Continuous Delivery
      type: header
-   - name: "[LECTURE PLACEHOLDER] CD with GitHub Actions"
+   - name: "Uploading Artifacts"
      type: lecture
-     video: dQw4w9WgXcQ
+     video: GoE-JKkoPH0
    - id: artifact-promo
-     name: Artifact Promotion
+     name: Upload a Build Artifact
      type: challenge
