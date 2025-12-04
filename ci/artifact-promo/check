@@ -92,7 +92,7 @@ def run_workflow():
         return -1, ""
 
 def chal_pass() -> None:
-    print(text_colors['green'] + "The workflow has completed as expected. Great job! Here's your flag:")
+    print(text_colors['green'] + "The workflow has completed as expected. Great job! Your flag should be shown above.")
     #with open("/flag") as f:
     #    print(text_colors['dflt'] + f.read())
 
@@ -125,7 +125,7 @@ result, workflow_output = run_workflow()
 if( result == 0 ):
     print(text_colors['green'] + "Checking some postconditions..." + text_colors['dflt'])
     if postcheck_script(workflow_output):  # verify hash
-        chal_pass("You should see your output above!")
+        chal_pass()
     else:
         chal_fail("The challenge has failed.")
 else:
