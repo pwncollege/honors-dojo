@@ -33,7 +33,7 @@ chmod 644 /home/hacker/.hidden_env_vars
 chown hacker:hacker /home/hacker/.hidden_env_vars
 
 # Create .bashrc that sources the environment variables
-cat > /home/hacker/.bashrc << 'EOF'
+cat >> /home/hacker/.bashrc << 'EOF'
 # Challenge 2 Setup - Source environment variables
 source /home/hacker/.hidden_env_vars
 EOF
