@@ -1,0 +1,9 @@
+name: Challenge Workflow
+run-name: ${{ github.actor }} is hunting for the flag 🚀
+on:
+  - push
+jobs:
+  build-binary:
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1 # hint: This can be done in one line

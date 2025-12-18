@@ -1,0 +1,14 @@
+name: Challenge Upload Artifact
+description: Upload artifact without internet access
+inputs:
+  file:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Upload artifact
+      shell: bash
+      run: |
+        mkdir -p /challenge/artifacts
+        cp "${{ inputs.file }}" /challenge/artifacts/program

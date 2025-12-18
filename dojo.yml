@@ -6,3 +6,4 @@ award:
 modules:
  - id: irc
  - id: security
+ - id: ci

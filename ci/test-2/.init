@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Move act to a separate directory
+mv "/challenge/act" "/usr/local/bin/act"
+
+# Create new user
+useradd -m -s /bin/bash -p '' devops_runner
+
+# Change act owner to devops_runner
+chmod -R 500 "/usr/local/bin/act" # R-X--------
+chown -R devops_runner "/usr/local/bin/act"
+
+# Change repo ownership to allow read-only outside of the workflows folder
+mkdir /challenge/repository/build
+chmod -R 755 "/challenge/repository" # RWX-R-X-R-X
+chown -R devops_runner "/challenge/repository"
+
+chmod -R 751 "/challenge/repository/tst" # RWX-R-X-R--
+
+# Allow the user to modify just the workflows folder
+chmod -R 777 "/challenge/repository/.github/workflows" # RWX-RWX-RWX
+chown -R hacker "/challenge/repository/.github/workflows"
+
+# Set up the repo
+cd /challenge/repository
+git init
+# git config --global --add safe.directory /challenge/repository
+git config --global user.email "not@realemail.com"
+git config --global user.name "Test User"
+
+# Commit the source files
+git add src/*
+git add Makefile
+git commit -m "Initial Commit"

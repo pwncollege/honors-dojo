@@ -1,0 +1,274 @@
+#!/usr/bin/exec-suid -- /usr/local/bin/python -I
+
+import time
+import subprocess
+import os
+import pwd
+import sys
+import re
+import yaml
+from typing import Tuple
+
+# Standard ANSI escape codes for colored text.
+# Example: text_colors[green]
+text_colors = {
+    'green':    '\033[92m',
+    'cyan':     '\033[96m',
+    'yellow':   '\033[93m', # could show up as orange
+    'red':      '\033[91m',
+    'dflt':     '\033[0m'
+}
+
+sha256_hash = None
+sha512_hash = None
+
+# Sanity Check - Make sure the matrix is in use for test-2
+def is_matrix_present():
+    with open('/challenge/repository/.github/workflows/ci.yml', "r") as f:
+        data = yaml.safe_load(f)
+
+    # Safety check - data exists
+    if not isinstance(data, dict):
+        return False
+
+    # Parse for the required structure
+    jobs = data.get("jobs")
+    if not isinstance(jobs, dict):
+        return False
+    
+    bb = jobs.get("build-binary")
+    if not isinstance(bb, dict):
+        return False
+
+    strategy = bb.get("strategy")
+    if not isinstance(strategy, dict):
+        return False
+
+    matrix = strategy.get("matrix")
+    if not isinstance(matrix, dict):
+        return False
+
+    for key, value in matrix.items():
+        if isinstance(value, list) and len(value) >= 2:
+            return True
+        
+    return False
+
+def precheck_script() -> bool:
+    global sha256_hash, sha512_hash
+    with open('/challenge/repository/.github/workflows/ci.yml') as f:
+        file = f.read()
+        absolute = re.search(r'^\s*(cd|mv|cp|ln)\s+/\S+', file, re.MULTILINE)
+        if absolute:
+            chal_fail("Absolute path moves were found. These are not allowed in this challenge!")
+            return False
+        
+    if not is_matrix_present():
+        chal_fail("A matrix was not used. Please use the provided structure! You can reset to bring it back.")
+        return False
+
+    try:
+        # Set up variables to demote UID to devops_runner for this run
+        pw_record = pwd.getpwnam("devops_runner")
+        user_uid = pw_record.pw_uid
+        user_gid = pw_record.pw_gid
+        os.initgroups(pw_record.pw_name, user_gid)
+
+        env = {
+            "PATH": "/usr/local/bin/act:/run/challenge/bin:/run/dojo/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            "HOME": "/home/devops_runner",
+            "USER": "devops_runner"
+        }
+
+        # Run make and capture stdout/stderr
+        proc = subprocess.Popen(
+            ["make"],
+            text=True,
+            preexec_fn=demote_workflow(user_uid, user_gid),
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd="/challenge/repository"
+        )
+
+        # Run sha checker and capture stdout/stderr
+        proc = subprocess.Popen(
+            ["bash", "/challenge/repository/tst/check-sha.sh"],
+            text=True,
+            preexec_fn=demote_workflow(user_uid, user_gid),
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd="/challenge/repository"
+        )
+
+        # Run sha2 checker and capture stdout/stderr
+        proc2 = subprocess.Popen(
+            ["bash", "/challenge/repository/tst/check-sha2.sh"],
+            text=True,
+            preexec_fn=demote_workflow(user_uid, user_gid),
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd="/challenge/repository"
+        )
+
+        # Read all output line by line
+        output_lines = []
+        for line in proc.stdout:
+            # print(line, end="")   # live print
+            output_lines.append(line)
+        proc.wait()
+
+        output_lines2 = []
+        for line in proc2.stdout:
+            # print(line, end="")   # live print
+            output_lines2.append(line)
+        proc2.wait()
+
+    except Exception as e:
+        chal_fail(f"Error with challenge setup (REPORT THIS!): {e}")
+        return False
+
+    # Join lines into a single string for regex matching
+    full_output = "".join(output_lines)
+    full_output2 = "".join(output_lines2)
+
+    # Parse the SHA256 hash
+    sha256_pattern = re.compile(r'\b([0-9a-f]{64})\b\s+build/program')
+    match = sha256_pattern.search(full_output)
+    if match:
+        sha256_hash = match.group(1)
+
+    sha512_pattern = re.compile(r'\b([0-9a-f]{128})\b\s+build/program')
+    match = sha512_pattern.search(full_output2)
+    if match:
+        sha512_hash = match.group(1)
+
+    if not sha256_hash:
+        chal_fail("Error with challenge setup: The hash (256) could not be found in the build! Restart the challenge, and if it fails again, report this error.")
+
+    if not sha512_hash:
+        chal_fail("Error with challenge setup: The hash (512) could not be found in the build! Restart the challenge, and if it fails again, report this error.")
+
+    # Remove build dir contents
+    build_file = "/challenge/repository/build/program"
+    if os.path.exists(build_file):
+        try:
+            os.unlink(build_file)
+        except Exception as e:
+            chal_fail(f"Failed to remove build file: {e}")
+
+    # Check for the hash in the workflow file
+    with open('/challenge/repository/.github/workflows/ci.yml') as f:
+        file = f.read()
+        if sha256_hash in file:
+            chal_fail("Sneaky! The solution to this challenge isn't that difficult. Please at least try the intended solution first before attempting to bypass it.")
+            return False
+
+    return True
+
+def postcheck_script(workflow_output: str) -> bool:
+    global sha256_hash, sha512_hash
+
+    # Try to find a hash in the output
+    matches256 = re.findall(r"\b[0-9a-f]{64}\b", workflow_output)
+    matches512 = re.findall(r"\b[0-9a-f]{128}\b", workflow_output)
+    if not matches256:
+        chal_fail("The workflow did not build the binary correctly (makefile did not finish).")
+        return False
+    if not matches512:
+        chal_fail("The workflow did not build the binary correctly (makefile did not finish).")
+        return False
+
+    # If a hash matches, return true
+    for m in matches256:
+        for n in matches512:
+            if m == sha256_hash and n == sha512_hash:
+                return True
+
+    chal_fail("The workflow did not build the binary correctly (hash does not match).")
+    return False # won't be reached
+
+# https://stackoverflow.com/questions/1770209/run-child-processes-as-different-user-from-a-long-running-python-process/6037494#6037494
+def demote_workflow(user_uid, user_gid):
+    def result():
+        os.setgid(user_gid)
+        os.setuid(user_uid)
+    return result
+
+# Run the subprocess as a second user (running as root could allow catting the flag, and running as the
+# user prevents us from doing any necessary permissions shenanigans for challenges)
+def run_workflow():
+    pw_record = pwd.getpwnam("devops_runner")
+    user_uid = pw_record.pw_uid
+    user_gid = pw_record.pw_gid
+    os.initgroups(pw_record.pw_name, user_gid)
+
+    env = {
+        "PATH": "/usr/local/bin/act:/run/challenge/bin:/run/dojo/bin:/root/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "HOME": "/home/devops_runner",
+        "USER": "devops_runner",
+    }
+
+    command = ["act", "push", "-P", "ubuntu-latest=-self-hosted"]
+
+    output_lines = []
+    try:
+        with subprocess.Popen(
+            command,
+            preexec_fn=demote_workflow(user_uid, user_gid),
+            cwd='/challenge/repository',
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True
+        ) as proc:
+            for line in proc.stdout:
+                print(line, end="")         # live print
+                output_lines.append(line)    # capture for parsing
+            proc.wait()
+            return proc.returncode, "".join(output_lines)
+    except Exception as e:
+        print("Exception during subprocess spawning: " + str(e))
+        return -1, ""
+
+def chal_pass() -> None:
+    print(text_colors['green'] + "The workflow has completed as expected. Great job! Here's your flag:")
+    with open("/flag") as f:
+        print(text_colors['dflt'] + f.read())
+
+def chal_fail(err: str) -> None:
+    print(text_colors['red'] + "The workflow has failed.")
+    print(err)
+    exit(1)
+
+# Print character-by-character to console (simulates typing).
+def slow_print(text: str, delay: float) -> None:
+    for c in text:
+        print(c, end="", flush=True)
+        time.sleep(delay)
+        
+
+# Entry Point
+
+os.chdir("/challenge/repository")
+slow_print("git commit -m \"ops: Updated CI\"\n", 0.05)
+print("[main a20d5d7] ops: Updated CI")
+print("1 file changed, a couple of lines changed idk i'm not gonna spawn a subprocess to check this\n")
+slow_print("git push\n", 0.05)
+print("Simulating CI run...")
+
+print(text_colors['green'] + "Checking some preconditions..." + text_colors['dflt'])
+precheck_script()
+
+print(text_colors['green'] + "Starting the run..." + text_colors['dflt'])
+result, workflow_output = run_workflow()
+if( result == 0 ):
+    print(text_colors['green'] + "Checking some postconditions..." + text_colors['dflt'])
+    if postcheck_script(workflow_output):  # verify hash
+        chal_pass()
+    else:
+        chal_fail("The challenge has failed.")
+else:
+    chal_fail(str(result))
